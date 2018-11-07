@@ -86,6 +86,9 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
 
       for (unsigned int inode=0; inode<Mesh->el_type; ++inode){
           node = Mesh->cells_nodes[Mesh->el_type*e_gid+inode];
+          dx_shape_functions(inode,0) = Mesh->DX_N_cells(inode,e_lid);
+          dx_shape_functions(inode,1) = Mesh->DY_N_cells(inode,e_lid);
+          dx_shape_functions(inode,2) = Mesh->DZ_N_cells(inode,e_lid);
           for (int iddl=0; iddl<3; ++iddl){
               Indices_cells[3*inode+iddl] = 3*node+iddl;
               for (unsigned int jnode=0; jnode<Mesh->el_type; ++jnode){
@@ -96,15 +99,11 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
           }
       }
 
+      compute_B_matrices(dx_shape_functions,matrix_B);
+
       for (unsigned int gp=0; gp<n_gauss_points; ++gp){
           gauss_weight = Mesh->gauss_weight_cells(gp);
-          for (unsigned int inode=0; inode<Mesh->el_type; ++inode){
-              dx_shape_functions(inode,0) = Mesh->DX_N_cells(gp+n_gauss_points*inode,e_lid);
-              dx_shape_functions(inode,1) = Mesh->DY_N_cells(gp+n_gauss_points*inode,e_lid);
-              dx_shape_functions(inode,2) = Mesh->DZ_N_cells(gp+n_gauss_points*inode,e_lid);
-          }
 
-          compute_B_matrices(dx_shape_functions,matrix_B);
           get_elasticity_tensor(e_lid, gp, tangent_matrix);
 
           error = B_times_TM.Multiply('T','N',gauss_weight*Mesh->detJac_cells(e_lid,gp),matrix_B,tangent_matrix,0.0);
@@ -114,7 +113,8 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
       for (unsigned int i=0; i<3*Mesh->el_type; ++i){
           for (unsigned int j=0; j<3*Mesh->el_type; ++j){
               error = K.SumIntoGlobalValues(1, &Indices_cells[i], 1, &Indices_cells[j], &Ke(i,j));
-          }        }
+          }
+      }
   }
   delete[] Indices_cells;
 }
