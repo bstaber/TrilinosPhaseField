@@ -5,12 +5,26 @@
 
 namespace TPF {
 
-  class damage: public baseClassFEM {
+  class damage : public baseClassFEM
+  {
 
-    damage();
+  public:
+    double gc;
+    double lc;
+
+    damage(Epetra_Comm & comm, mesh & mesh_, double & gc_, double & lc_);
     ~damage();
 
-  }
+    void assemble(Epetra_FECrsMatrix & matrix, Epetra_FEVector & rhs,
+                  Epetra_MultiVector & damageHistory);
+
+    void solve(Teuchos::ParameterList & Parameters,
+                                 Epetra_FECrsMatrix & matrix, Epetra_Vector & lhs, Epetra_FEVector & rhs,
+                                 Epetra_Vector & damageHistory);
+
+    void create_FECrsGraph();
+
+  };
 
 }
 
