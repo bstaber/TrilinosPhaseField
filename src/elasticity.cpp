@@ -81,6 +81,8 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
   Epetra_SerialDenseMatrix matrix_B(6,3*Mesh->el_type);
   Epetra_SerialDenseMatrix B_times_TM(3*Mesh->el_type,6);
 
+  double g, d;
+
   for (unsigned int e_lid=0; e_lid<Mesh->n_local_cells; ++e_lid){
       e_gid = Mesh->local_cells[e_lid];
 
@@ -101,6 +103,7 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
 
       compute_B_matrices(dx_shape_functions,matrix_B);
 
+      d = 0.0;
       for (unsigned int gp=0; gp<n_gauss_points; ++gp){
           gauss_weight = Mesh->gauss_weight_cells(gp);
 
