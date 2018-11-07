@@ -60,10 +60,10 @@ void TPF::damage::assemble(Epetra_FECrsMatrix & matrix, Epetra_FEVector & rhs,
           shape_functions(inode) = Mesh->N_cells(inode,gp);
           fe(inode) += gauss_weight*2.0*he*shape_functions(inode)*Mesh->detJac_cells(eloc);
         }
-        me.Multiply('N','T',ae*gauss_weight*Mesh->detJac_cells(eloc),shape_functions,shape_functions,1.0);
+        me.Multiply('N','T',gauss_weight,shape_functions,shape_functions,1.0);
       }
-
-      ke.Multiply('T','N',be*gauss_weight*Mesh->detJac_cells(eloc),dx_shape_functions,dx_shape_functions,0.0);
+      me.Scale(ae*Mesh->detJac_cells(eloc));
+      ke.Multiply('T','N',be*Mesh->vol_cells(eloc),dx_shape_functions,dx_shape_functions,0.0);
       ke += me;
     }
 

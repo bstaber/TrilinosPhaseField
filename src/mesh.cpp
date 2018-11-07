@@ -376,16 +376,12 @@ void TPF::mesh::computeFE(){
         jacobian_matrix(X,D,JacobianMatrix);
         jacobian_det(JacobianMatrix,detJac_cells(eloc));
         dX_shape_functions(D,JacobianMatrix,detJac_cells(eloc),DX);
+        vol_cells(eloc) = (1.0/6.0)*detJac_cells(eloc);
 
         for (int inode=0; inode<el_type; ++inode){
           DX_N_cells(inode,eloc) = DX(inode,0);
           DY_N_cells(inode,eloc) = DX(inode,1);
           DZ_N_cells(inode,eloc) = DX(inode,2);
-        }
-
-        vol_cells(eloc) = 0.0;
-        for (unsigned int gp=0; gp<n_gauss_cells; ++gp){
-          vol_cells(eloc) += gauss_weight_cells(gp)*std::fabs(detJac_cells(eloc));
         }
     }
 }
