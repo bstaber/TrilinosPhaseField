@@ -4,9 +4,11 @@ Brian Staber (brian.staber@gmail.com)
 
 #ifndef BASECLASSFEM_HPP
 #define BASECLASSFEM_HPP
-#include "mesh.hpp"
+#include "Epetra_FECrsMatrix.h"
 #include "Epetra_FECrsGraph.h"
+#include "Epetra_FEVector.h"
 #include "Epetra_Map.h"
+#include "mesh.hpp"
 
 namespace TPF {
 
