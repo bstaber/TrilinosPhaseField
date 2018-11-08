@@ -24,17 +24,19 @@ public:
     double z;
     int node;
 
+    // get the total number of prescribed dof
     for (unsigned int i=0; i<Mesh->n_local_nodes_without_ghosts; ++i){
         node = Mesh->local_nodes[i];
-        z    = Mesh->nodes_coord[3*node+2];
-        if(z<=1.0e-6 && z>=-1.0e-6){
-            n_bc_dof+=3;
+        z    = Mesh->nodes_coord[3*node+2]; // where do you want
+        if(z<=1.0e-6 && z>=-1.0e-6){        // to apply Dirichlet conditions ?
+            n_bc_dof+=3;                    // how many dof at this location ?
         }
-        if(z<=10+1.0e-6 && z>=10-1.0e-6){
+        if(z<=10+1.0e-6 && z>=10-1.0e-6){   // how many dof at this location ?
             n_bc_dof+=1;
         }
     }
 
+    // store the prescibred dof into a vector dof_on_boundary
     int indbc = 0;
     dof_on_boundary = new int [n_bc_dof];
     for (unsigned int inode=0; inode<Mesh->n_local_nodes_without_ghosts; ++inode){
@@ -67,7 +69,7 @@ public:
         node = Mesh->local_nodes[inode];
         z    = Mesh->nodes_coord[3*node+2];
         if (z<=10+1.0e-6 && z>=10-1.0e-6){
-            v[0][Mesh->StandardMapU->LID(3*node+2)] = displacement;
+            v[0][Mesh->StandardMapU->LID(3*node+2)] = displacement; 
         }
     }
 
