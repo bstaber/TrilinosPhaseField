@@ -424,7 +424,7 @@ void TPF::mesh::build_FECrsGraphs(){
 
   }
   Comm->Barrier();
-  FEGraph->GlobalAssemble();
+  FEGraphU->GlobalAssemble();
   delete [] indexU;
 
   FEGraphD = new Epetra_FECrsGraph(Copy,*StandardMapD,100);
@@ -447,4 +447,5 @@ void TPF::mesh::build_FECrsGraphs(){
   Comm->Barrier();
   FEGraphD->GlobalAssemble();
   delete [] indexD;
+  
 }
