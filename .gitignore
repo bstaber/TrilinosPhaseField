@@ -1,3 +1,4 @@
 *.msh
 *.o
 .DS_Store
+test/
