@@ -34,7 +34,8 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
   }
 
   double bc_disp = 0.0;
-  //damageHistory.PutScalar(0.0);
+  damageHistory.PutScalar(0.0);
+  
   for (int n=0; n<n_steps; ++n){
 
     Time.ResetStartTime();
@@ -45,9 +46,9 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
 
     updateDamageHistory(damageHistory, lhs_u);
 
-    //phaseFieldBVP->solve(ParametersList.sublist("Damage"), matrix_d, lhs_d, rhs_d, damageHistory);
+    phaseFieldBVP->solve_d(matrix_d, rhs_d, lhs_d, ParametersList, damageHistory);
 
-    //damageSolutionOverlaped->Import(lhs_d, *damageInterface->ImportToOverlapMap, Insert);
+    damageSolutionOverlaped->Import(lhs_d, *Mesh->ImportToOverlapMapD, Insert);
 
     if (Comm->MyPID()==0){
       std::cout << n << std::setw(15) << Time.ElapsedTime() << "\n";
