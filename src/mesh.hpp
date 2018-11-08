@@ -14,6 +14,10 @@
 #include "Epetra_MpiComm.h"
 #include "metis.h"
 
+#include "Epetra_FECrsGraph.h"
+#include "Epetra_Import.h"
+#include "Epetra_Map.h"
+
 namespace TPF {
 
 class mesh{
@@ -44,7 +48,15 @@ class mesh{
 
     void computeFE();
 
+    void build_FECrsGraphs();
+    void build_EpetraMaps();
+
     Epetra_Comm * Comm;
+
+    Epetra_Map        * OverlapMap,  * OverlapMapU,  * OverlapMapD;
+    Epetra_Map        * StandardMap, * StandardMapU, * StandardMapD;
+    Epetra_Import     * ImportToOverlapMap, * ImportToOverlapMapU, * ImportToOverlapMapD;
+    Epetra_FECrsGraph * FEGraph, * FEGraphU, * FEGraphD;
 
     Epetra_SerialDenseVector local_rows, vol_cells, detJac_cells;
     Epetra_SerialDenseMatrix N_cells, DX_N_cells, DY_N_cells, DZ_N_cells;

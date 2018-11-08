@@ -13,6 +13,9 @@ TPF::mesh::mesh(Epetra_Comm & comm, std::string & filename, double scaling){
     set_gauss_points(4, gauss_weight_cells, xi_cells, eta_cells, zeta_cells);
 
     computeFE();
+
+    build_EpetraMaps();
+    build_FECrsGraphs();
 }
 
 TPF::mesh::~mesh(){
@@ -384,4 +387,64 @@ void TPF::mesh::computeFE(){
           DZ_N_cells(inode,eloc) = DX(inode,2);
         }
     }
+}
+
+void TPF::mesh::build_EpetraMaps(){
+
+  StandardMapU        = new Epetra_Map(-1, n_local_nodes_without_ghosts, &local_nodes_without_ghosts[0], 0, *Comm);
+  OverlapMapU         = new Epetra_Map(-1, n_local_nodes, &local_nodes[0], 0, *Comm);
+  ImportToOverlapMapU = new Epetra_Import(*OverlapMapU, *StandardMapU);
+
+  StandardMapD        = new Epetra_Map(-1, n_local_nodes_without_ghosts, &local_nodes_without_ghosts[0], 0, *Comm);
+  OverlapMapD         = new Epetra_Map(-1, n_local_nodes, &local_nodes[0], 0, *Comm);
+  ImportToOverlapMapD = new Epetra_Import(*OverlapMapD, *StandardMapD);
+
+}
+
+void TPF::mesh::build_FECrsGraphs(){
+
+  FEGraphU = new Epetra_FECrsGraph(Copy,*StandardMapU,100);
+  int *indexU;
+  indexU = new int [3*el_type];
+
+  int eglob, node;
+  for (int e_lid=0; e_lid<n_local_cells; ++e_lid){
+      eglob = local_cells[e_lid];
+      for (int inode=0; inode<el_type; ++inode){
+          node = cells_nodes[el_type*eglob+inode];
+          for (int ddl=0; ddl<3; ++ddl){
+              indexU[3*inode+ddl] = 3*node+ddl;
+          }
+      }
+      for (int i=0; i<3*el_type; ++i){
+          for (int j=0; j<3*el_type; ++j){
+              FEGraphU->InsertGlobalIndices(1, &indexU[i], 1, &indexU[j]);
+          }
+      }
+
+  }
+  Comm->Barrier();
+  FEGraph->GlobalAssemble();
+  delete [] indexU;
+
+  FEGraphD = new Epetra_FECrsGraph(Copy,*StandardMapD,100);
+  int *indexD;
+  indexD = new int [el_type];
+
+  for (int eloc=0; eloc<n_local_cells; ++eloc){
+      eglob = local_cells[eloc];
+      for (int inode=0; inode<el_type; ++inode){
+          node = cells_nodes[el_type*eglob+inode];
+          indexD[inode] = node;
+      }
+
+      for (int i=0; i<el_type; ++i){
+          for (int j=0; j<el_type; ++j){
+              FEGraphD->InsertGlobalIndices(1, &indexD[i], 1, &indexD[j]);
+          }
+      }
+  }
+  Comm->Barrier();
+  FEGraphD->GlobalAssemble();
+  delete [] indexD;
 }
