@@ -6,11 +6,17 @@
 #include "Teuchos_ParameterList.hpp"
 #include "Teuchos_RCP.hpp"
 
+#include "EpetraExt_MultiVectorOut.h"
+#include "EpetraExt_MultiVectorIn.h"
+#include "EpetraExt_RowMatrixOut.h"
+#include "EpetraExt_VectorIn.h"
+
 #include "Epetra_FECrsMatrix.h"
 #include "Epetra_FECrsGraph.h"
 #include "Epetra_FEVector.h"
 
 #include "Epetra_Import.h"
+#include "Epetra_Export.h"
 #include "Epetra_Map.h"
 
 #include "AztecOO.h"
@@ -33,6 +39,8 @@ namespace TPF {
     void stiffness_homogeneousForcing(Epetra_FECrsMatrix & K);
 
     void compute_B_matrices(Epetra_SerialDenseMatrix & dx_shape_functions, Epetra_SerialDenseMatrix & B);
+
+    int print_solution(Epetra_Vector & solution, std::string filename);
 
     mesh        * Mesh;
     Epetra_Comm * Comm;

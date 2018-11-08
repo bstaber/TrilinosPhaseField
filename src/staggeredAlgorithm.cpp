@@ -3,12 +3,13 @@
 TPF::staggeredAlgorithm::staggeredAlgorithm(Epetra_Comm & comm, mesh & mesh_) : elasticity(comm, mesh_){
   Mesh = &mesh_;
   Comm = &comm;
+
+  phaseFieldBVP = Teuchos::rcp(new damage(comm, *Mesh, gc, lc));
 }
 
 TPF::staggeredAlgorithm::~staggeredAlgorithm(){
 }
 
-/*
 void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterList & ParametersList, bool print){
 
   double delta_u  = Teuchos::getParameter<double>(ParametersList.sublist("Elasticity"), "delta_u");
@@ -16,36 +17,38 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
 
   Epetra_Time Time(*Comm);
 
-  Epetra_FECrsMatrix matrix_d(Copy,*damageInterface->FEGraph);
-  Epetra_FECrsMatrix matrix_u(Copy,*FEGraph);
+  Epetra_FECrsMatrix matrix_d(Copy,*Mesh->FEGraphD);
+  Epetra_FECrsMatrix matrix_u(Copy,*Mesh->FEGraphU);
 
-  Epetra_FEVector    rhs_d(*damageInterface->StandardMap);
-  Epetra_FEVector    rhs_u(*StandardMap);
+  Epetra_FEVector    rhs_d(*Mesh->StandardMapD);
+  Epetra_FEVector    rhs_u(*Mesh->StandardMapU);
 
-  Epetra_Vector      lhs_d(*damageInterface->StandardMap);
-  Epetra_Vector      lhs_u(*StandardMap);
+  Epetra_Vector      lhs_d(*Mesh->StandardMapD);
+  Epetra_Vector      lhs_u(*Mesh->StandardMapU);
 
+  /*
   Epetra_Map GaussMap = constructGaussMap();
   Epetra_Vector damageHistory(GaussMap);
+  */
 
   if (Comm->MyPID()==0){
     std::cout << "step" << std::setw(15) << "cpu_time (s)" << "\n";
   }
 
   double bc_disp = 0.0;
-  damageHistory.PutScalar(0.0);
+  //damageHistory.PutScalar(0.0);
   for (int n=0; n<n_steps; ++n){
 
     Time.ResetStartTime();
 
-    damageInterface->solve(ParametersList.sublist("Damage"), matrix_d, lhs_d, rhs_d, damageHistory, GaussMap);
+    //phaseFieldBVP->solve(ParametersList.sublist("Damage"), matrix_d, lhs_d, rhs_d, damageHistory);
 
-    damageSolutionOverlaped->Import(lhs_d, *damageInterface->ImportToOverlapMap, Insert);
+    //damageSolutionOverlaped->Import(lhs_d, *damageInterface->ImportToOverlapMap, Insert);
 
     bc_disp = (double(n)+1.0)*delta_u;
-    computeDisplacement(ParametersList.sublist("Elasticity"), matrix_u, lhs_u, rhs_u, bc_disp);
+    //computeDisplacement(ParametersList.sublist("Elasticity"), matrix_u, lhs_u, rhs_u, bc_disp);
 
-    updateDamageHistory(damageHistory, lhs_u, GaussMap);
+    //updateDamageHistory(damageHistory, lhs_u, GaussMap);
 
     if (Comm->MyPID()==0){
       std::cout << n << std::setw(15) << Time.ElapsedTime() << "\n";
@@ -55,13 +58,14 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
       std::string dispfile = "/home/s/staber/Trilinos_results/examples/phasefield/displacement" + std::to_string(int(n)) + ".mtx";
       std::string damgfile = "/home/s/staber/Trilinos_results/examples/phasefield/damage"       + std::to_string(int(n)) + ".mtx";
       int error_u = print_solution(lhs_u, dispfile);
-      int error_d = damageInterface->print_solution(lhs_d, damgfile);
+      int error_d = phaseFieldBVP->print_solution(lhs_d, damgfile);
     }
 
   }
 
 }
 
+/*
 void TPF::staggeredAlgorithm::computeDisplacement(Teuchos::ParameterList & Parameters,
                                                     Epetra_FECrsMatrix & matrix, Epetra_Vector & lhs, Epetra_FEVector & rhs,
                                                     double & bc_disp){

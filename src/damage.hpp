@@ -6,11 +6,17 @@
 #include "Teuchos_ParameterList.hpp"
 #include "Teuchos_RCP.hpp"
 
+#include "EpetraExt_MultiVectorOut.h"
+#include "EpetraExt_MultiVectorIn.h"
+#include "EpetraExt_RowMatrixOut.h"
+#include "EpetraExt_VectorIn.h"
+
 #include "Epetra_FECrsMatrix.h"
 #include "Epetra_FECrsGraph.h"
 #include "Epetra_FEVector.h"
 
 #include "Epetra_Import.h"
+#include "Epetra_Export.h"
 #include "Epetra_Map.h"
 
 #include "AztecOO.h"
@@ -33,6 +39,8 @@ namespace TPF {
     void solve(Teuchos::ParameterList & Parameters,
                                  Epetra_FECrsMatrix & matrix, Epetra_Vector & lhs, Epetra_FEVector & rhs,
                                  Epetra_Vector & damageHistory);
+
+    int print_solution(Epetra_Vector & lhs, std::string filename);
 
     mesh        * Mesh;
     Epetra_Comm * Comm;
