@@ -127,14 +127,14 @@ void TPF::elasticity::compute_B_matrices(Epetra_SerialDenseMatrix & dx_shape_fun
 }
 
 int TPF::elasticity::print_solution(Epetra_Vector & solution, std::string filename){
-    int NumTargetElements = 0;
-    if (Comm->MyPID()==0){
-        NumTargetElements = 3*Mesh->n_nodes;
-    }
-    Epetra_Map MapOnRoot(-1,NumTargetElements,0,*Comm);
-    Epetra_Export ExportOnRoot(*Mesh->StandardMapU,MapOnRoot);
-    Epetra_MultiVector lhs_root(MapOnRoot,true);
-    lhs_root.Export(solution,ExportOnRoot,Insert);
-    int error = EpetraExt::MultiVectorToMatrixMarketFile(filename.c_str(),lhs_root,0,0,false);
-    return error;
+  int NumTargetElements = 0;
+  if (Comm->MyPID()==0){
+      NumTargetElements = 3*Mesh->n_nodes;
+  }
+  Epetra_Map MapOnRoot(-1,NumTargetElements,0,*Comm);
+  Epetra_Export ExportOnRoot(*Mesh->StandardMapU,MapOnRoot);
+  Epetra_MultiVector lhs_root(MapOnRoot,true);
+  lhs_root.Export(solution,ExportOnRoot,Insert);
+  int error = EpetraExt::MultiVectorToMatrixMarketFile(filename.c_str(),lhs_root,0,0,false);
+  return error;
 }

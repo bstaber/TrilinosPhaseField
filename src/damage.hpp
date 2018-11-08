@@ -37,8 +37,8 @@ namespace TPF {
                   Epetra_MultiVector & damageHistory);
 
     void solve(Teuchos::ParameterList & Parameters,
-                                 Epetra_FECrsMatrix & matrix, Epetra_Vector & lhs, Epetra_FEVector & rhs,
-                                 Epetra_Vector & damageHistory);
+               Epetra_FECrsMatrix & matrix, Epetra_Vector & lhs, Epetra_FEVector & rhs,
+               Epetra_Vector & damageHistory);
 
     int print_solution(Epetra_Vector & lhs, std::string filename);
 

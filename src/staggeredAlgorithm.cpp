@@ -41,14 +41,15 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
 
     Time.ResetStartTime();
 
-    //phaseFieldBVP->solve(ParametersList.sublist("Damage"), matrix_d, lhs_d, rhs_d, damageHistory);
+    bc_disp = (double(n)+1.0)*delta_u;
 
     //damageSolutionOverlaped->Import(lhs_d, *damageInterface->ImportToOverlapMap, Insert);
 
-    bc_disp = (double(n)+1.0)*delta_u;
-    //computeDisplacement(ParametersList.sublist("Elasticity"), matrix_u, lhs_u, rhs_u, bc_disp);
-
     //updateDamageHistory(damageHistory, lhs_u, GaussMap);
+
+    //phaseFieldBVP->solve(ParametersList.sublist("Damage"), matrix_d, lhs_d, rhs_d, damageHistory);
+
+    //computeDisplacement(ParametersList.sublist("Elasticity"), matrix_u, lhs_u, rhs_u, bc_disp);
 
     if (Comm->MyPID()==0){
       std::cout << n << std::setw(15) << Time.ElapsedTime() << "\n";

@@ -99,14 +99,14 @@ void TPF::damage::solve(Teuchos::ParameterList & Parameters,
 }
 
 int TPF::damage::print_solution(Epetra_Vector & lhs, std::string filename){
-    int NumTargetElements = 0;
-    if (Comm->MyPID()==0){
-        NumTargetElements = Mesh->n_nodes;
-    }
-    Epetra_Map MapOnRoot(-1,NumTargetElements,0,*Comm);
-    Epetra_Export ExportOnRoot(*Mesh->StandardMapD,MapOnRoot);
-    Epetra_MultiVector lhs_root(MapOnRoot,true);
-    lhs_root.Export(lhs,ExportOnRoot,Insert);
-    int error = EpetraExt::MultiVectorToMatrixMarketFile(filename.c_str(),lhs_root,0,0,false);
-    return error;
+  int NumTargetElements = 0;
+  if (Comm->MyPID()==0){
+      NumTargetElements = Mesh->n_nodes;
+  }
+  Epetra_Map MapOnRoot(-1,NumTargetElements,0,*Comm);
+  Epetra_Export ExportOnRoot(*Mesh->StandardMapD,MapOnRoot);
+  Epetra_MultiVector lhs_root(MapOnRoot,true);
+  lhs_root.Export(lhs,ExportOnRoot,Insert);
+  int error = EpetraExt::MultiVectorToMatrixMarketFile(filename.c_str(),lhs_root,0,0,false);
+  return error;
 }
