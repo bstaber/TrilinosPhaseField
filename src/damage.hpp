@@ -34,7 +34,7 @@ namespace TPF {
     ~damage();
 
     void assemble(Epetra_FECrsMatrix & matrix, Epetra_FEVector & rhs,
-                  Epetra_MultiVector & damageHistory);
+                  Epetra_Vector & damageHistory);
 
     void solve(Teuchos::ParameterList & Parameters,
                Epetra_FECrsMatrix & matrix, Epetra_Vector & lhs, Epetra_FEVector & rhs,

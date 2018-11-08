@@ -11,7 +11,7 @@ TPF::damage::~damage(){
 }
 
 void TPF::damage::assemble(Epetra_FECrsMatrix & matrix, Epetra_FEVector & rhs,
-                           Epetra_MultiVector & damageHistory){
+                           Epetra_Vector & damageHistory){
 
   matrix.PutScalar(0.0);
   rhs.PutScalar(0.0);
@@ -34,7 +34,7 @@ void TPF::damage::assemble(Epetra_FECrsMatrix & matrix, Epetra_FEVector & rhs,
   for (unsigned int eloc=0; eloc<Mesh->n_local_cells; ++eloc){
 
     eglob = Mesh->local_cells[eloc];
-    he = damageHistory[0][eloc];
+    he = damageHistory[eloc];
     ae = 2.0*he + gc/double(lc);
 
     for (int inode=0; inode<Mesh->el_type; ++inode){
