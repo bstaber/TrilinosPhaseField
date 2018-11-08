@@ -404,8 +404,7 @@ void TPF::mesh::build_EpetraMaps(){
 void TPF::mesh::build_FECrsGraphs(){
 
   FEGraphU = new Epetra_FECrsGraph(Copy,*StandardMapU,100);
-  int *indexU;
-  indexU = new int [3*el_type];
+  int * indexU = new int [3*el_type];
 
   int eglob, node;
   for (int e_lid=0; e_lid<n_local_cells; ++e_lid){
@@ -428,8 +427,7 @@ void TPF::mesh::build_FECrsGraphs(){
   delete [] indexU;
 
   FEGraphD = new Epetra_FECrsGraph(Copy,*StandardMapD,100);
-  int *indexD;
-  indexD = new int [el_type];
+  int * indexD = new int [el_type];
 
   for (int eloc=0; eloc<n_local_cells; ++eloc){
       eglob = local_cells[eloc];
@@ -447,5 +445,5 @@ void TPF::mesh::build_FECrsGraphs(){
   Comm->Barrier();
   FEGraphD->GlobalAssemble();
   delete [] indexD;
-  
+
 }
