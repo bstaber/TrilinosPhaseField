@@ -1,17 +1,17 @@
-#ifndef APPLICATIONTEMPLATE_HPP
-#define APPLICATIONTEMPLATE_HPP
+#ifndef BLOCK_SINGLE_NOTCH_HPP
+#define BLOCK_SINGLE_NOTCH_HPP
 
 #include "staggeredAlgorithm.hpp"
 
-class ApplicationTemplate : public TPF::staggeredAlgorithm
+class block_single_notch : public TPF::staggeredAlgorithm
 {
 
 public:
-  ApplicationTemplate(Epetra_Comm & comm, TPF::mesh & mesh_, Teuchos::ParameterList & Parameters):
+  block_single_notch(Epetra_Comm & comm, TPF::mesh & mesh_, Teuchos::ParameterList & Parameters):
   staggeredAlgorithm(comm, mesh_){
     // add steps if needed
   }
-  ~ApplicationTemplate(){
+  ~block_single_notch(){
     // delete any pointers that you introduced in this file
   }
 
@@ -69,7 +69,7 @@ public:
         node = Mesh->local_nodes[inode];
         z    = Mesh->nodes_coord[3*node+2];
         if (z<=10+1.0e-6 && z>=10-1.0e-6){
-            v[0][Mesh->StandardMapU->LID(3*node+2)] = displacement; 
+            v[0][Mesh->StandardMapU->LID(3*node+2)] = displacement;
         }
     }
 
