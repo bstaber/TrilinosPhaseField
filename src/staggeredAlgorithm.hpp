@@ -19,14 +19,14 @@ namespace TPF {
     void staggeredAlgorithmDirichletBC(Teuchos::ParameterList & ParametersList, bool print);
 
     void updateDamageHistory(Epetra_Vector & damageHistory, Epetra_Vector & displacement);
-    
+
     mesh        * Mesh;
     Epetra_Comm * Comm;
 
     Teuchos::RCP<damage> phaseFieldBVP;
 
     double gc, lc;
-    double E, nu, lambda, mu;
+    double lambda, mu;
 
     Epetra_Vector * damageSolutionOverlaped;
 

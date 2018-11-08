@@ -1,16 +1,20 @@
 #include "staggeredAlgorithm.hpp"
 
-TPF::staggeredAlgorithm::staggeredAlgorithm(Epetra_Comm & comm, mesh & mesh_) : elasticity(comm, mesh_){
+TPF::staggeredAlgorithm::staggeredAlgorithm(Epetra_Comm & comm, mesh & mesh_)
+: elasticity(comm, mesh_){
   Mesh = &mesh_;
   Comm = &comm;
-
-  phaseFieldBVP = Teuchos::rcp(new damage(comm, *Mesh, gc, lc));
 }
 
 TPF::staggeredAlgorithm::~staggeredAlgorithm(){
 }
 
 void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterList & ParametersList, bool print){
+
+  gc = Teuchos::getParameter<double>(ParametersList.sublist("Damage"), "gc");
+  lc = Teuchos::getParameter<double>(ParametersList.sublist("Damage"), "lc");
+
+  Teuchos::RCP<damage> phaseFieldBVP = Teuchos::rcp(new damage(*Comm, *Mesh, gc, lc));
 
   double delta_u  = Teuchos::getParameter<double>(ParametersList.sublist("Elasticity"), "delta_u");
   int n_steps     = Teuchos::getParameter<int>(ParametersList.sublist("Elasticity"), "n_steps");
@@ -35,18 +39,18 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
 
   double bc_disp = 0.0;
   damageHistory.PutScalar(0.0);
-  
+
   for (int n=0; n<n_steps; ++n){
 
     Time.ResetStartTime();
 
     bc_disp = (double(n)+1.0)*delta_u;
 
-    solve_u(matrix_u, rhs_u, lhs_u, ParametersList, bc_disp);
+    solve_u(matrix_u, rhs_u, lhs_u, ParametersList.sublist("Elasticity"), bc_disp);
 
     updateDamageHistory(damageHistory, lhs_u);
 
-    phaseFieldBVP->solve_d(matrix_d, rhs_d, lhs_d, ParametersList, damageHistory);
+    phaseFieldBVP->solve_d(matrix_d, rhs_d, lhs_d, ParametersList.sublist("Damage"), damageHistory);
 
     damageSolutionOverlaped->Import(lhs_d, *Mesh->ImportToOverlapMapD, Insert);
 
