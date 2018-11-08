@@ -1,6 +1,8 @@
 #include "elasticity.hpp"
 
-TPF::elasticity::elasticity(){
+TPF::elasticity::elasticity(Epetra_Comm & comm, mesh & mesh_){
+  Mesh = &mesh_;
+  Comm = &comm;
 }
 
 TPF::elasticity::~elasticity(){

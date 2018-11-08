@@ -1,14 +1,28 @@
 #ifndef ELASTICITY_HPP
 #define ELASTICITY_HPP
 
-#include "baseClassFEM.hpp"
+#include "Teuchos_XMLParameterListCoreHelpers.hpp"
+#include "Teuchos_StandardCatchMacros.hpp"
+#include "Teuchos_ParameterList.hpp"
+#include "Teuchos_RCP.hpp"
+
+#include "Epetra_FECrsMatrix.h"
+#include "Epetra_FECrsGraph.h"
+#include "Epetra_FEVector.h"
+
+#include "Epetra_Import.h"
+#include "Epetra_Map.h"
+
+#include "AztecOO.h"
+
+#include "mesh.hpp"
 
 namespace TPF {
 
   class elasticity
   {
   public:
-    elasticity();
+    elasticity(Epetra_Comm & comm, mesh & mesh_);
     ~elasticity();
 
     void create_FECrsGraph();
