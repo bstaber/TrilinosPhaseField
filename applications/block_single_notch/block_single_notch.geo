@@ -22,14 +22,17 @@ Point(7) = {0, a, c, lc1};
 Point(8) = {b, a, c, lc1};
 
 Point(9)  = {d, 0, b-H, lc2};
-Point(10) = {b, 0, b-H, lc2};
+Point(10) = {b, 0, b-H, lc1};
 Point(11) = {d, a, b-H, lc2};
-Point(12) = {b, a, b-H, lc2};
+Point(12) = {b, a, b-H, lc1};
 
 Point(13) = {d, 0, b+H, lc2};
-Point(14) = {b, 0, b+H, lc2};
+Point(14) = {b, 0, b+H, lc1};
 Point(15) = {d, a, b+H, lc2};
-Point(16) = {b, a, b+H, lc2};
+Point(16) = {b, a, b+H, lc1};
+
+Point(17) = {0, 0, b, lc2};
+Point(18) = {0, a, b, lc2};
 
 //+
 Line(1) = {2, 4};
@@ -74,56 +77,63 @@ Line(20) = {8, 7};
 //+
 Line(21) = {7, 5};
 //+
-Line(22) = {5, 6};
+Line(22) = {5, 6};//+
+Line(23) = {1, 17};
 //+
-Line(23) = {7, 3};
+Line(24) = {17, 18};
 //+
-Line(24) = {5, 1};
+Line(25) = {18, 3};
 //+
-Line Loop(1) = {10, 11, 12, -16};
+Line(26) = {17, 5};
+//+
+Line(27) = {18, 7};
+//+
+Line Loop(1) = {23, 24, 25, -3};
 //+
 Plane Surface(1) = {1};
 //+
-Line Loop(2) = {16, 13, -15, 9};
+Line Loop(2) = {24, 27, 21, -26};
 //+
 Plane Surface(2) = {2};
 //+
-Line Loop(3) = {8, 15, 14, 6};
+Line Loop(3) = {20, -27, 25, 4, 5, -14, -13, -12, 17};
 //+
 Plane Surface(3) = {3};
 //+
-Line Loop(4) = {17, 18, 19, 11};
+Line Loop(4) = {21, 22, -18, 20};
 //+
 Plane Surface(4) = {4};
 //+
-Line Loop(5) = {6, 7, 1, 5};
+Line Loop(5) = {26, 22, 19, -10, -9, -8, 7, 2, 23};
 //+
 Plane Surface(5) = {5};
 //+
-Line Loop(6) = {1, -4, -3, -2};
+Line Loop(6) = {19, 11, 17, 18};
 //+
 Plane Surface(6) = {6};
 //+
-Line Loop(7) = {23, -3, -24, -21};
+Line Loop(7) = {7, 1, 5, 6};
 //+
 Plane Surface(7) = {7};
 //+
-Line Loop(8) = {22, -18, 20, 21};
+Line Loop(8) = {2, 3, 4, -1};
 //+
 Plane Surface(8) = {8};
 //+
-Line Loop(9) = {2, -24, 22, 19, -10, -9, -8, 7};
+Line Loop(9) = {12, -16, 10, 11};
 //+
-Plane Surface(9) = {9};
+Line Loop(10) = {12, -16, 10, 11};
 //+
-Line Loop(10) = {23, 4, 5, -14, -13, -12, 17, 20};
+Plane Surface(9) = {10};
 //+
-Plane Surface(10) = {10};
+Line Loop(11) = {9, 16, 13, -15};
 //+
-Surface Loop(1) = {9, 6, 5, 3, 2, 1, 4, 10, 7, 8};
+Plane Surface(10) = {11};
+//+
+Line Loop(12) = {8, 15, 14, 6};
+//+
+Plane Surface(11) = {12};
+//+
+Surface Loop(1) = {5, 2, 1, 3, 4, 6, 9, 10, 11, 7, 8};
 //+
 Volume(1) = {1};
-//+
-Physical Surface("TOP") = {8};
-//+
-Physical Volume("VOL") = {1};

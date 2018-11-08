@@ -1,7 +1,7 @@
 <ParameterList>
 
     <ParameterList name="Mesh">
-        <Parameter name="mesh_file" type="string" value="/Users/brian/Documents/GitHub/TrilinosPhaseField/meshes/beam.msh"/>
+        <Parameter name="mesh_file" type="string" value="/Users/brian/Documents/GitHub/TrilinosPhaseField/applcaitions/block_single_notch/block_single_notch.msh"/>
     </ParameterList>
 
     <ParameterList name="Elasticity">
