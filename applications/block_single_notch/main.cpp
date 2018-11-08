@@ -12,7 +12,7 @@
 #include "Teuchos_XMLParameterListCoreHelpers.hpp"
 #include "Teuchos_CommandLineProcessor.hpp"
 
-#include "ApplicationTemplate.hpp"
+#include "block_single_notch.hpp"
 
 int main(int argc, char *argv[]){
 
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
   std::string filename = Teuchos::getParameter<std::string>(Parameters->sublist("Mesh"), "filename");
   TPF::mesh mesh(Comm, filename, 1.0);
 
-  Teuchos::RCP<ApplicationTemplate> example = Teuchos::rcp(new ApplicationTemplate(Comm, mesh, *Parameters));
+  Teuchos::RCP<block_single_notch> example = Teuchos::rcp(new block_single_notch(Comm, mesh, *Parameters));
 
   example->setup_dirichlet_conditions();
 
