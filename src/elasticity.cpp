@@ -100,29 +100,29 @@ void TPF::elasticity::solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epe
 void TPF::elasticity::compute_B_matrices(Epetra_SerialDenseMatrix & dx_shape_functions, Epetra_SerialDenseMatrix & B){
   double factor = 1.0/std::sqrt(2.0);
   for (unsigned inode=0; inode<Mesh->el_type; ++inode){
-      B(0,3*inode) = dx_shape_functions(inode,0);
-      B(0,3*inode+1) = 0.0;
-      B(0,3*inode+2) = 0.0;
+    B(0,3*inode) = dx_shape_functions(inode,0);
+    B(0,3*inode+1) = 0.0;
+    B(0,3*inode+2) = 0.0;
 
-      B(1,3*inode) = 0.0;
-      B(1,3*inode+1) = dx_shape_functions(inode,1);
-      B(1,3*inode+2) = 0.0;
+    B(1,3*inode) = 0.0;
+    B(1,3*inode+1) = dx_shape_functions(inode,1);
+    B(1,3*inode+2) = 0.0;
 
-      B(2,3*inode) = 0.0;
-      B(2,3*inode+1) = 0.0;
-      B(2,3*inode+2) = dx_shape_functions(inode,2);
+    B(2,3*inode) = 0.0;
+    B(2,3*inode+1) = 0.0;
+    B(2,3*inode+2) = dx_shape_functions(inode,2);
 
-      B(3,3*inode) = 0.0;
-      B(3,3*inode+1) = factor*dx_shape_functions(inode,2);
-      B(3,3*inode+2) = factor*dx_shape_functions(inode,1);
+    B(3,3*inode) = 0.0;
+    B(3,3*inode+1) = factor*dx_shape_functions(inode,2);
+    B(3,3*inode+2) = factor*dx_shape_functions(inode,1);
 
-      B(4,3*inode) = factor*dx_shape_functions(inode,2);
-      B(4,3*inode+1) = 0.0;
-      B(4,3*inode+2) = factor*dx_shape_functions(inode,0);
+    B(4,3*inode) = factor*dx_shape_functions(inode,2);
+    B(4,3*inode+1) = 0.0;
+    B(4,3*inode+2) = factor*dx_shape_functions(inode,0);
 
-      B(5,3*inode) = factor*dx_shape_functions(inode,1);
-      B(5,3*inode+1) = factor*dx_shape_functions(inode,0);
-      B(5,3*inode+2) = 0.0;
+    B(5,3*inode) = factor*dx_shape_functions(inode,1);
+    B(5,3*inode+1) = factor*dx_shape_functions(inode,0);
+    B(5,3*inode+2) = 0.0;
   }
 }
 
