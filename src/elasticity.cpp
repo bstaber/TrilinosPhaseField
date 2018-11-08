@@ -9,25 +9,6 @@ TPF::elasticity::~elasticity(){
     delete [] dof_on_boundary;
 }
 
-void TPF::elasticity::aztecSolver(Epetra_FECrsMatrix & A, Epetra_FEVector & b, Epetra_Vector & u, Teuchos::ParameterList & paramList){
-  u.PutScalar(0.0);
-
-  Epetra_LinearProblem problem;
-  AztecOO solver;
-
-  problem.SetOperator(&A);
-  problem.SetLHS(&u);
-  problem.SetRHS(&b);
-
-  solver.SetProblem(problem);
-  solver.SetParameters(paramList);
-
-  double tol  = Teuchos::getParameter<double>(paramList,"AZ_tol");
-  int maxIter = Teuchos::getParameter<int>(paramList,"AZ_max_iter");
-
-  solver.Iterate(maxIter,tol);
-}
-
 void TPF::elasticity::assemblePureDirichlet_homogeneousForcing(Epetra_FECrsMatrix & K){
 
   K.PutScalar(0.0);
@@ -95,6 +76,25 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
       }
   }
   delete[] Indices_cells;
+}
+
+void TPF::elasticity::solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epetra_Vector & lhs,
+                            Teuchos::ParameterList & Parameters, double & bc_disp){
+
+  rhs.PutScalar(0.0);
+  lhs.PutScalar(0.0);
+
+  assemblePureDirichlet_homogeneousForcing(A);
+  apply_dirichlet_conditions(A, rhs, bc_disp);
+
+  int max_iter = Teuchos::getParameter<int>(Parameters.sublist("Aztec"), "AZ_max_iter");
+  double tol   = Teuchos::getParameter<double>(Parameters.sublist("Aztec"), "AZ_tol");
+
+  Epetra_LinearProblem problem(&A, &lhs, &rhs);
+
+  AztecOO solver(problem);
+  solver.SetParameters(Parameters.sublist("Aztec"));
+  solver.Iterate(max_iter, tol);
 }
 
 void TPF::elasticity::compute_B_matrices(Epetra_SerialDenseMatrix & dx_shape_functions, Epetra_SerialDenseMatrix & B){

@@ -17,15 +17,9 @@ namespace TPF {
     ~staggeredAlgorithm();
 
     void staggeredAlgorithmDirichletBC(Teuchos::ParameterList & ParametersList, bool print);
-/*
-    void computeDisplacement(Teuchos::ParameterList & ParameterList,
-                             Epetra_FECrsMatrix & matrix, Epetra_Vector & lhs, Epetra_FEVector & rhs,
-                             double & bc_disp);
 
-    void updateDamageHistory(Epetra_Vector & damageHistory,
-                             Epetra_Vector & displacement);
-*/
-
+    void updateDamageHistory(Epetra_Vector & damageHistory, Epetra_Vector & displacement);
+    
     mesh        * Mesh;
     Epetra_Comm * Comm;
 

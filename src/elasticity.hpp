@@ -31,12 +31,11 @@ namespace TPF {
     elasticity(Epetra_Comm & comm, mesh & mesh_);
     ~elasticity();
 
-    void create_FECrsGraph();
-
-    void aztecSolver(Epetra_FECrsMatrix & A, Epetra_FEVector & b, Epetra_Vector & u, Teuchos::ParameterList & paramList);
-
     void assemblePureDirichlet_homogeneousForcing(Epetra_FECrsMatrix & K);
     void stiffness_homogeneousForcing(Epetra_FECrsMatrix & K);
+
+    void solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & b, Epetra_Vector & u,
+               Teuchos::ParameterList & Parameters, double & bc_disp);
 
     void compute_B_matrices(Epetra_SerialDenseMatrix & dx_shape_functions, Epetra_SerialDenseMatrix & B);
 
