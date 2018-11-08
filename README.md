@@ -4,6 +4,13 @@
 
 ### In progress.
 
+* Three-dimensional
+* Dirichlet conditions on displacement only
+* No Dirichlet conditions on phase field
+* Staggered algorithm
+* Anisotropic model of Miehe
+* Homogeneous, heterogeneous or random heterogeneous media
+
 ### Packages and libraries
 
 * Built on top of Sandia's Trilinos Project [[Website](http://trilinos.org/) |
