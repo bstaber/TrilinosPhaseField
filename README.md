@@ -8,6 +8,8 @@
 * Staggered algorithm
 * Anisotropic model of Miehe
 * Homogeneous, heterogeneous or random heterogeneous media
+* Linear tetra only
+* Linearized elastic behavior, i.e., a single Newton-Raphson step is performed
 
 ### Packages and libraries
 
