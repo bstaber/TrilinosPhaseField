@@ -41,6 +41,8 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
 
   double bc_disp = 0.0;
   damageHistory.PutScalar(0.0);
+  damageSolutionOverlaped->PutScalar(0.0);
+  displacementSolutionOverlaped->PutScalar(0.0);
 
   for (int n=0; n<n_steps; ++n){
 
@@ -50,11 +52,12 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
 
     solve_u(matrix_u, rhs_u, lhs_u, ParametersList.sublist("Elasticity"), bc_disp);
 
-    updateDamageHistory(damageHistory, lhs_u);
+    updateDamageHistory(damageHistory);
 
     phaseFieldBVP->solve_d(matrix_d, rhs_d, lhs_d, ParametersList.sublist("Damage"), damageHistory);
 
     damageSolutionOverlaped->Import(lhs_d, *Mesh->ImportToOverlapMapD, Insert);
+    displacementSolutionOverlaped->Import(lhs_u, *Mesh->ImportToOverlapMapU, Insert);
 
     if (Comm->MyPID()==0){
       std::cout << n << std::setw(15) << Time.ElapsedTime() << "\n";
@@ -71,10 +74,7 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
 
 }
 
-void TPF::staggeredAlgorithm::updateDamageHistory(Epetra_Vector & damageHistory, Epetra_Vector & displacement){
-
-  Epetra_Vector u(*Mesh->OverlapMapU);
-  u.Import(displacement, *Mesh->ImportToOverlapMapU, Insert);
+void TPF::staggeredAlgorithm::updateDamageHistory(Epetra_Vector & damageHistory){
 
   int n_gauss_points = Mesh->n_gauss_cells;
 
@@ -97,7 +97,7 @@ void TPF::staggeredAlgorithm::updateDamageHistory(Epetra_Vector & damageHistory,
       dx_shape_functions(inode,2) = Mesh->DZ_N_cells(inode,elid);
       for (unsigned int ddl=0; ddl<3; ++ddl){
         id = 3*node+ddl;
-        cells_u(3*inode+ddl) = u[Mesh->OverlapMapU->LID(id)];
+        cells_u(3*inode+ddl) = displacementSolutionOverlaped[0][Mesh->OverlapMapU->LID(id)];
       }
     }
 
@@ -118,6 +118,8 @@ void TPF::staggeredAlgorithm::updateDamageHistory(Epetra_Vector & damageHistory,
 
 }
 
-void TPF::staggeredAlgorithm::get_elasticity_tensor(unsigned int & e_lid, unsigned int & gp, Epetra_SerialDenseMatrix & elasticity_matrix){
+void TPF::staggeredAlgorithm::get_elasticity_tensor(Epetra_SerialDenseMatrix & elasticity_matrix, Epetra_SerialDenseVector & epsilon, double & phi){
+
+
 
 }

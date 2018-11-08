@@ -37,7 +37,11 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
   Epetra_SerialDenseMatrix matrix_B(6,3*Mesh->el_type);
   Epetra_SerialDenseMatrix B_times_TM(3*Mesh->el_type,6);
 
-  double g, d;
+  Epetra_SerialDenseVector epsilon(6);
+  Epetra_SerialDenseVector u(6);
+
+
+  double phi = 0.0;
 
   for (unsigned int e_lid=0; e_lid<Mesh->n_local_cells; ++e_lid){
       e_gid = Mesh->local_cells[e_lid];
@@ -49,6 +53,7 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
           dx_shape_functions(inode,2) = Mesh->DZ_N_cells(inode,e_lid);
           for (int iddl=0; iddl<3; ++iddl){
               Indices_cells[3*inode+iddl] = 3*node+iddl;
+              u(3*inode+iddl) = displacementSolutionOverlaped[0][Mesh->OverlapMapU->LID(3*node+iddl)];
               for (unsigned int jnode=0; jnode<Mesh->el_type; ++jnode){
                   for (int jddl=0; jddl<3; ++jddl){
                       Ke(3*inode+iddl,3*jnode+jddl) = 0.0;
@@ -57,13 +62,13 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
           }
       }
 
-      compute_B_matrices(dx_shape_functions,matrix_B);
+      compute_B_matrices(dx_shape_functions, matrix_B);
+      epsilon.Multiply('N', 'N', 1.0, matrix_B, u, 0.0);
 
-      d = 0.0;
       for (unsigned int gp=0; gp<n_gauss_points; ++gp){
           gauss_weight = Mesh->gauss_weight_cells(gp);
 
-          get_elasticity_tensor(e_lid, gp, tangent_matrix);
+          get_elasticity_tensor(tangent_matrix, epsilon, phi);
 
           error = B_times_TM.Multiply('T','N',gauss_weight*Mesh->detJac_cells(e_lid,gp),matrix_B,tangent_matrix,0.0);
           error = Ke.Multiply('N','N',1.0,B_times_TM,matrix_B,1.0);

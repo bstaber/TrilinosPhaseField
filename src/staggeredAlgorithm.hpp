@@ -22,9 +22,9 @@ namespace TPF {
 
     void staggeredAlgorithmDirichletBC(Teuchos::ParameterList & ParametersList, bool print);
 
-    void updateDamageHistory(Epetra_Vector & damageHistory, Epetra_Vector & displacement);
+    void updateDamageHistory(Epetra_Vector & damageHistory);
 
-    void get_elasticity_tensor(unsigned int & e_lid, unsigned int & gp, Epetra_SerialDenseMatrix & elasticity_matrix);
+    void get_elasticity_tensor(Epetra_SerialDenseMatrix & elasticity_matrix, Epetra_SerialDenseVector & epsilon, double & phi);
 
     /*
     mesh        * Mesh;

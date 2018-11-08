@@ -46,7 +46,9 @@ namespace TPF {
 
     virtual void setup_dirichlet_conditions() = 0;
     virtual void apply_dirichlet_conditions(Epetra_FECrsMatrix & K, Epetra_FEVector & F, double & displacement) = 0;
-    virtual void get_elasticity_tensor(unsigned int & e_lid, unsigned int & gp, Epetra_SerialDenseMatrix & elasticity_matrix) = 0;
+    virtual void get_elasticity_tensor(Epetra_SerialDenseMatrix & elasticity_matrix, Epetra_SerialDenseVector & epsilon, double & phi) = 0;
+
+    Epetra_Vector * displacementSolutionOverlaped;
 
     unsigned int n_bc_dof;
     int * dof_on_boundary;
