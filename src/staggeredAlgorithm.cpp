@@ -1,6 +1,8 @@
 #include "staggeredAlgorithm.hpp"
 
 TPF::staggeredAlgorithm::staggeredAlgorithm(Epetra_Comm & comm, mesh & mesh_) : elasticity(comm, mesh_){
+  Mesh = &mesh_;
+  Comm = &comm;
 }
 
 TPF::staggeredAlgorithm::~staggeredAlgorithm(){
