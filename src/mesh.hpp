@@ -71,6 +71,7 @@ class mesh{
     idx_t * npart;
     int   * NumIndicesPerRow;
 
+    int dim     = 3;
     int n_nodes = 0;
     int n_cells = 0;
     int el_type = 4;

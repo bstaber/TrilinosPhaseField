@@ -34,7 +34,7 @@ int TPF::mesh::read_gmsh(std::string & filename, double scaling){
     }
 
     char   buf[100], c;
-    double xyz[3];
+    double coord;
 
     unsigned int n_total_cells;
     unsigned int el_info;
@@ -59,12 +59,12 @@ int TPF::mesh::read_gmsh(std::string & filename, double scaling){
 
     for (int i=0; i<n_nodes; ++i){
         meshfile >> num;
-        meshfile >> xyz[0];
-        meshfile >> xyz[1];
-        meshfile >> xyz[2];
-        nodes_coord[3*i+0] = xyz[0]/scaling;
-        nodes_coord[3*i+1] = xyz[1]/scaling;
-        nodes_coord[3*i+2] = xyz[2]/scaling;
+        meshfile >> coord;
+        nodes_coord[3*i+0] = coord/scaling;
+        meshfile >> coord;
+        nodes_coord[3*i+1] = coord/scaling;
+        meshfile >> coord;
+        nodes_coord[3*i+2] = coord/scaling;
     }
 
     meshfile.getline(buf,100);
