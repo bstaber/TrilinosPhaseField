@@ -2,6 +2,8 @@
 
 TPF::staggeredAlgorithm::staggeredAlgorithm(Epetra_Comm & comm, mesh & mesh_)
 : elasticity(comm, mesh_){
+
+  Lapack = new Epetra_LAPACK();
   /*
   Mesh = &mesh_;
   Comm = &comm;
@@ -9,6 +11,8 @@ TPF::staggeredAlgorithm::staggeredAlgorithm(Epetra_Comm & comm, mesh & mesh_)
 }
 
 TPF::staggeredAlgorithm::~staggeredAlgorithm(){
+  delete [] damageSolutionOverlaped;
+  delete [] Lapack;
 }
 
 void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterList & ParametersList, bool print){
@@ -120,6 +124,7 @@ void TPF::staggeredAlgorithm::updateDamageHistory(Epetra_Vector & damageHistory)
 
 void TPF::staggeredAlgorithm::get_elasticity_tensor(Epetra_SerialDenseMatrix & elasticity_matrix, Epetra_SerialDenseVector & epsilon, double & phi){
 
-
+// implement this, use Epetra_LAPACK.
+// Lapack->SPEV(...);
 
 }

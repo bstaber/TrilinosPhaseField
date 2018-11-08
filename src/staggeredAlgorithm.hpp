@@ -5,6 +5,7 @@
 #include "damage.hpp"
 
 #include "Epetra_Time.h"
+#include "Epetra_LAPACK.h"
 
 #include "ml_MultiLevelPreconditioner.h"
 #include "ml_epetra_utils.h"
@@ -37,6 +38,7 @@ namespace TPF {
     double lambda, mu;
 
     Epetra_Vector * damageSolutionOverlaped;
+    Epetra_LAPACK * Lapack;
 
   };
 }
