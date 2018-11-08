@@ -2,8 +2,10 @@
 
 TPF::staggeredAlgorithm::staggeredAlgorithm(Epetra_Comm & comm, mesh & mesh_)
 : elasticity(comm, mesh_){
+  /*
   Mesh = &mesh_;
   Comm = &comm;
+  */
 }
 
 TPF::staggeredAlgorithm::~staggeredAlgorithm(){
@@ -113,5 +115,9 @@ void TPF::staggeredAlgorithm::updateDamageHistory(Epetra_Vector & damageHistory,
       damageHistory[elid] = potential;
     }
   }
+
+}
+
+void TPF::staggeredAlgorithm::get_elasticity_tensor(unsigned int & e_lid, unsigned int & gp, Epetra_SerialDenseMatrix & elasticity_matrix){
 
 }

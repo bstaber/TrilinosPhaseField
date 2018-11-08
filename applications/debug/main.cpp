@@ -19,7 +19,7 @@ int main(int argc, char *argv[]){
   std::string xmlInFileName = "";
 
   Teuchos::CommandLineProcessor clp(false);
-  clp.setOption("xml-in-file",&xmlInFileName,"The XML file to read into a parameter list");
+  clp.setOption("parameters",&xmlInFileName,"The XML file to read into a parameter list");
   clp.setDocString("TO DO.");
 
   Teuchos::CommandLineProcessor::EParseCommandLineReturn
@@ -30,10 +30,10 @@ int main(int argc, char *argv[]){
   }
 
   #ifdef HAVE_MPI
-  MPI_Init(&argc, &argv);
-  Epetra_MpiComm Comm(MPI_COMM_WORLD);
+    MPI_Init(&argc, &argv);
+    Epetra_MpiComm Comm(MPI_COMM_WORLD);
   #else
-  Epetra_SerialComm Comm;
+    Epetra_SerialComm Comm;
   #endif
 
   Teuchos::RCP<Teuchos::ParameterList> Parameters = Teuchos::rcp(new Teuchos::ParameterList);
