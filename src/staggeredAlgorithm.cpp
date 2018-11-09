@@ -19,6 +19,12 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
   lc = Teuchos::getParameter<double>(ParametersList.sublist("Damage"), "lc");
   Teuchos::RCP<damage> phaseFieldBVP = Teuchos::rcp(new damage(*Comm, *Mesh, gc, lc));
 
+  double E  = Teuchos::getParameter<double>(ParametersList.sublist("Elasticity"), "young");
+  double nu = Teuchos::getParameter<double>(ParametersList.sublist("Elasticity"), "poisson");
+
+  lambda = E*nu/((1.0+nu)*(1.0-2.0*nu));
+  mu     = E/(2.0*(1.0+nu));
+
   double delta_u  = Teuchos::getParameter<double>(ParametersList.sublist("Elasticity"), "delta_u");
   int n_steps     = Teuchos::getParameter<int>(ParametersList.sublist("Elasticity"), "n_steps");
 
@@ -52,23 +58,24 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
     bc_disp = (double(n)+1.0)*delta_u;
 
     solve_u(matrix_u, rhs_u, lhs_u, ParametersList, bc_disp);
-    /*
+
     updateDamageHistory(damageHistory);
 
     phaseFieldBVP->solve_d(matrix_d, rhs_d, lhs_d, ParametersList, damageHistory);
 
     damageSolutionOverlaped->Import(lhs_d, *Mesh->ImportToOverlapMapD, Insert);
-    displacementSolutionOverlaped->Import(lhs_u, *Mesh->ImportToOverlapMapU, Insert);
-    */
+    displacementSolutionOverlaped->Import(lhs_u, *Mesh->ImportToOverlapMapU, Insert); // this seems to be a problem
+
     if (Comm->MyPID()==0){
       std::cout << n << std::setw(15) << Time.ElapsedTime() << "\n";
     }
 
+    /*
     std::string dispfile = path + "displacement" + std::to_string(int(n)) + ".mtx";
     std::string damgfile = path + "damage"       + std::to_string(int(n)) + ".mtx";
     int error_u = print_solution(lhs_u, dispfile);
     int error_d = phaseFieldBVP->print_solution(lhs_d, damgfile);
-
+    */
   }
 
 }
@@ -101,7 +108,7 @@ void TPF::staggeredAlgorithm::updateDamageHistory(Epetra_Vector & damageHistory)
     }
 
     compute_B_matrices(dx_shape_functions,matrix_B);
-    epsilon.Multiply('N','N',1.0,matrix_B,cells_u,0.0);
+    epsilon.Multiply('N', 'N', 1.0, matrix_B,cells_u, 0.0);
 
     trepsilon  = epsilon(0) + epsilon(1) + epsilon(2);
     trepsilon2 = epsilon(0)*epsilon(0) + epsilon(1)*epsilon(1) + epsilon(2)*epsilon(2) +
