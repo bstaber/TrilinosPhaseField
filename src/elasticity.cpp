@@ -11,7 +11,7 @@ TPF::elasticity::~elasticity(){
 
 }
 
-void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
+void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, Epetra_Vector & v, Epetra_Vector & phi){
 
   K.PutScalar(0.0);
 
@@ -32,7 +32,7 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
   Epetra_SerialDenseVector epsilon(6);
   Epetra_SerialDenseVector u(3*Mesh->el_type);
 
-  double phi;
+  double pf;
   for (unsigned int e_lid=0; e_lid<Mesh->n_local_cells; ++e_lid){
       e_gid = Mesh->local_cells[e_lid];
 
@@ -44,7 +44,7 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
 
           for (int iddl=0; iddl<3; ++iddl){
               Indices_cells[3*inode+iddl] = 3*node+iddl;
-              u(3*inode+iddl) = displacementSolutionOverlaped[0][Mesh->OverlapMapU->LID(3*node+iddl)];
+              u(3*inode+iddl) = v[Mesh->OverlapMapU->LID(3*node+iddl)];
               for (unsigned int jnode=0; jnode<Mesh->el_type; ++jnode){
                   for (int jddl=0; jddl<3; ++jddl){
                       Ke(3*inode+iddl,3*jnode+jddl) = 0.0;
@@ -57,16 +57,16 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
       compute_B_matrices(dx_shape_functions, matrix_B);
       epsilon.Multiply('N', 'N', 1.0, matrix_B, u, 0.0);
 
-      phi = 0.0;
+      pf = 0.0;
       for (unsigned int gp=0; gp<n_gauss_points; ++gp){
           gauss_weight = Mesh->gauss_weight_cells(gp);
 
           for (unsigned inode=0; inode<4; ++inode){
             node = Mesh->cells_nodes[Mesh->el_type*e_gid+inode];
-            phi += Mesh->N_cells(inode,gp)*damageSolutionOverlaped[0][Mesh->OverlapMapD->LID(node)];
+            pf += Mesh->N_cells(inode,gp)*phi[Mesh->OverlapMapD->LID(node)];
           }
 
-          get_elasticity_tensor(tangent_matrix, epsilon, phi);
+          get_elasticity_tensor(tangent_matrix, epsilon, pf);
 
           error = B_times_TM.Multiply('T', 'N', gauss_weight*Mesh->detJac_cells(e_lid), matrix_B, tangent_matrix, 0.0);
           error = Ke.Multiply('N', 'N', 1.0, B_times_TM, matrix_B, 1.0);
@@ -88,12 +88,13 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
 }
 
 void TPF::elasticity::solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epetra_Vector & lhs,
-                            Teuchos::ParameterList & Parameters, double & bc_disp){
+                              Teuchos::ParameterList & Parameters, double & bc_disp,
+                              Epetra_Vector & v, Epetra_Vector & phi){
 
   rhs.PutScalar(0.0);
   lhs.PutScalar(0.0);
 
-  stiffness_homogeneousForcing(A);
+  stiffness_homogeneousForcing(A, v, phi);
 
   apply_dirichlet_conditions(A, rhs, bc_disp);
 

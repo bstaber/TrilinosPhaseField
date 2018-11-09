@@ -33,10 +33,10 @@ namespace TPF {
     elasticity(Epetra_Comm & comm, mesh & mesh_);
     ~elasticity();
 
-    void stiffness_homogeneousForcing(Epetra_FECrsMatrix & K);
+    void stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, Epetra_Vector & v, Epetra_Vector & phi);
 
     void solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & b, Epetra_Vector & u,
-               Teuchos::ParameterList & Parameters, double & bc_disp);
+                 Teuchos::ParameterList & Parameters, double & bc_disp, Epetra_Vector & v, Epetra_Vector & phi);
 
     void compute_B_matrices(Epetra_SerialDenseMatrix & dx_shape_functions, Epetra_SerialDenseMatrix & B);
 
@@ -54,8 +54,6 @@ namespace TPF {
     virtual void apply_dirichlet_conditions(Epetra_FECrsMatrix & K, Epetra_FEVector & F, double & displacement) = 0;
 
     Epetra_LAPACK * Lapack;
-    Epetra_Vector * displacementSolutionOverlaped;
-    Epetra_Vector * damageSolutionOverlaped;
   };
 }
 #endif
