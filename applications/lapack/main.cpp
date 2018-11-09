@@ -23,26 +23,26 @@ int main(int argc, char *argv[]){
   A(0) = 0.8147; A(1) = 0.9096; A(3) = 0.2027;
                  A(2) = 0.6324; A(4) = 0.3222;
                                 A(5) = 0.9575;
-  int n = 3;
 
   char jobz = 'V';
   char uplo = 'U';
 
-  double * ap   = new double[6];   // packed lower or upper triangular part of the matrix
-  double * w    = new double[3];   // eigenvalues
+  double * ap   = new double[6]; // packed lower or upper triangular part of the matrix
+  double * w    = new double[3]; // eigenvalues
   double * z    = new double[9]; // eigenvectors
+
+  Epetra_SerialDenseVector eigv(3);
+  Epetra_SerialDenseVector eigw(9);
+
   double * WORK = new double[6];
   int    INFO;
 
   ap = &A[0];
 
-  Lapack.SPEV(jobz, uplo, n, ap, w, z, n, WORK, &INFO);
+  Lapack.SPEV(jobz, uplo, 3, ap, &eigv[0], &eigw[0], 3, WORK, &INFO);
 
-  Epetra_SerialDenseVector eigv(Copy, w, 3);
-  Epetra_SerialDenseVector eigw(Copy, z, 9);
   std::cout << "Eigv = " << eigv << "\n";
   std::cout << "Eigw = " << eigw << "\n";
-
 
   #ifdef HAVE_MPI
       MPI_Finalize();
