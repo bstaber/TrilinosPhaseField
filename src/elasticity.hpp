@@ -21,6 +21,8 @@
 
 #include "AztecOO.h"
 
+#include "Epetra_LAPACK.h"
+
 #include "mesh.hpp"
 
 namespace TPF {
@@ -38,15 +40,20 @@ namespace TPF {
 
     void compute_B_matrices(Epetra_SerialDenseMatrix & dx_shape_functions, Epetra_SerialDenseMatrix & B);
 
+    void get_elasticity_tensor(Epetra_SerialDenseMatrix & elasticity_matrix, Epetra_SerialDenseVector & epsilon, double & phi);
+
     int print_solution(Epetra_Vector & solution, std::string filename);
 
     mesh        * Mesh;
     Epetra_Comm * Comm;
 
+    double lambda = 0.0;
+    double mu = 0.0;
+
     virtual void setup_dirichlet_conditions() = 0;
     virtual void apply_dirichlet_conditions(Epetra_FECrsMatrix & K, Epetra_FEVector & F, double & displacement) = 0;
-    virtual void get_elasticity_tensor(Epetra_SerialDenseMatrix & elasticity_matrix, Epetra_SerialDenseVector & epsilon, double & phi) = 0;
 
+    Epetra_LAPACK * Lapack;
     Epetra_Vector * displacementSolutionOverlaped;
     Epetra_Vector * damageSolutionOverlaped;
   };

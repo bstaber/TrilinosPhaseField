@@ -17,6 +17,7 @@ public:
   }
   ~block_single_notch(){
     // delete any pointers that you introduced in this file
+    delete [] dof_on_boundary;
   }
 
   void setup_dirichlet_conditions(){

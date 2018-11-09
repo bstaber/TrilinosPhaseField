@@ -302,6 +302,7 @@ void TPF::mesh::set_gauss_points(int ngp, Epetra_SerialDenseVector & weight, Epe
         xi(0) = 1.0/4.0;
         eta(0) = 1.0/4.0;
         zeta(0) = 1.0/4.0;
+        n_gauss_cells = 1;
         break;
       case 4:
         weight.Resize(4); xi.Resize(4); eta.Resize(4); zeta.Resize(4);
@@ -310,6 +311,7 @@ void TPF::mesh::set_gauss_points(int ngp, Epetra_SerialDenseVector & weight, Epe
         xi(1) = alpha; eta(1) = alpha; zeta(1) = beta;
         xi(2) = alpha; eta(2) = beta;  zeta(2) = alpha;
         xi(3) = beta;  eta(3) = alpha; zeta(3) = alpha;
+        n_gauss_cells = 4;
         break;
       case 5:
         weight.Resize(5); xi.Resize(5); eta.Resize(5); zeta.Resize(5);
@@ -317,6 +319,7 @@ void TPF::mesh::set_gauss_points(int ngp, Epetra_SerialDenseVector & weight, Epe
         eta(0) = 0.25; eta(1) = 0.1666666666666667; eta(2) = 0.1666666666666667; eta(3) = 0.1666666666666667; eta(4) = 0.50;
         zeta(0) = 0.25; zeta(1) = 0.1666666666666667; zeta(2) = 0.1666666666666667; zeta(3) = 0.50; zeta(4) = 0.1666666666666667;
         weight(0) = -0.8000000000000000/6.0; weight(1) = 0.45/6.0; weight(2) = 0.45/6.0; weight(3) = 0.45/6.0; weight(4) =0.45/6.0;
+        n_gauss_cells = 5;
         break;
       case 11:
         weight.Resize(11); xi.Resize(11); eta.Resize(11); zeta.Resize(11);
@@ -324,6 +327,7 @@ void TPF::mesh::set_gauss_points(int ngp, Epetra_SerialDenseVector & weight, Epe
         eta(0) = 0.25; eta(1) = 0.0714285714285714; eta(2) = 0.0714285714285714; eta(3) = 0.0714285714285714; eta(4) = 0.7857142857142857; eta(5) = 0.3994035761667992; eta(6) = 0.1005964238332008; eta(7) = 0.3994035761667992; eta(8) = 0.1005964238332008; eta(9) = 0.3994035761667992; eta(10) = 0.1005964238332008;
         zeta(0) = 0.25; zeta(1) = 0.0714285714285714; zeta(2) = 0.0714285714285714; zeta(3) = 0.7857142857142857; zeta(4) = 0.0714285714285714; zeta(5) = 0.3994035761667992; zeta(6) = 0.3994035761667992; zeta(7) = 0.1005964238332008; zeta(8) = 0.1005964238332008; zeta(9) = 0.1005964238332008; zeta(10) = 0.3994035761667992;
         weight(0) = -0.0789333333333333/6.0; weight(1) = 0.0457333333333333/6.0; weight(2) = 0.0457333333333333/6.0; weight(3) = 0.0457333333333333/6.0; weight(4) = 0.0457333333333333/6.0; weight(5) = 0.1493333333333333/6.0; weight(6) = 0.1493333333333333/6.0; weight(7) = 0.1493333333333333/6.0; weight(8) = 0.1493333333333333/6.0; weight(9) = 0.1493333333333333/6.0; weight(10) = 0.1493333333333333/6.0;
+        n_gauss_cells = 5;
         break;
       default:
         std::cout << "Please pick a number of gauss points equal to 1, 4, 5, or 11: 4 is the default.\n";
@@ -333,6 +337,7 @@ void TPF::mesh::set_gauss_points(int ngp, Epetra_SerialDenseVector & weight, Epe
         xi(1) = alpha; eta(1) = alpha; zeta(1) = beta;
         xi(2) = alpha; eta(2) = beta;  zeta(2) = alpha;
         xi(3) = beta;  eta(3) = alpha; zeta(3) = alpha;
+        n_gauss_cells = 4;
         break;
     };
 }

@@ -25,14 +25,9 @@ namespace TPF {
 
     void updateDamageHistory(Epetra_Vector & damageHistory);
 
-    void get_elasticity_tensor(Epetra_SerialDenseMatrix & elasticity_matrix, Epetra_SerialDenseVector & epsilon, double & phi);
-
     Teuchos::RCP<damage> phaseFieldBVP;
 
     double gc, lc;
-    double lambda, mu;
-
-    Epetra_LAPACK * Lapack;
 
   };
 }
