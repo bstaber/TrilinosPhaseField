@@ -7,6 +7,10 @@ class block_single_notch : public TPF::staggeredAlgorithm
 {
 
 public:
+
+  unsigned int n_bc_dof;
+  int * dof_on_boundary;
+
   block_single_notch(Epetra_Comm & comm, TPF::mesh & mesh_, Teuchos::ParameterList & Parameters):
   staggeredAlgorithm(comm, mesh_){
     // add steps if needed

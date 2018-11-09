@@ -50,9 +50,6 @@ namespace TPF {
 
     Epetra_Vector * displacementSolutionOverlaped;
     Epetra_Vector * damageSolutionOverlaped;
-
-    unsigned int n_bc_dof;
-    int * dof_on_boundary;
   };
 }
 #endif

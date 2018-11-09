@@ -7,8 +7,7 @@ TPF::staggeredAlgorithm::staggeredAlgorithm(Epetra_Comm & comm, mesh & mesh_)
 }
 
 TPF::staggeredAlgorithm::~staggeredAlgorithm(){
-  delete [] damageSolutionOverlaped;
-  delete [] Lapack;
+
 }
 
 void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterList & ParametersList, bool print){

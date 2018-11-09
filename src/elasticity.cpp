@@ -6,7 +6,7 @@ TPF::elasticity::elasticity(Epetra_Comm & comm, mesh & mesh_){
 }
 
 TPF::elasticity::~elasticity(){
-    delete [] dof_on_boundary;
+
 }
 
 void TPF::elasticity::assemblePureDirichlet_homogeneousForcing(Epetra_FECrsMatrix & K){
