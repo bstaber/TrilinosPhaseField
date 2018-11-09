@@ -391,8 +391,8 @@ void TPF::mesh::computeFE(){
 
 void TPF::mesh::build_EpetraMaps(){
 
-  StandardMapU        = new Epetra_Map(-1, n_local_nodes_without_ghosts, &local_nodes_without_ghosts[0], 0, *Comm);
-  OverlapMapU         = new Epetra_Map(-1, n_local_nodes, &local_nodes[0], 0, *Comm);
+  StandardMapU        = new Epetra_Map(-1, 3*n_local_nodes_without_ghosts, &local_dof_without_ghosts[0], 0, *Comm);
+  OverlapMapU         = new Epetra_Map(-1, 3*n_local_nodes, &local_dof[0], 0, *Comm);
   ImportToOverlapMapU = new Epetra_Import(*OverlapMapU, *StandardMapU);
 
   StandardMapD        = new Epetra_Map(-1, n_local_nodes_without_ghosts, &local_nodes_without_ghosts[0], 0, *Comm);

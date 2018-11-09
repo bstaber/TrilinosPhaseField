@@ -31,7 +31,6 @@ namespace TPF {
     elasticity(Epetra_Comm & comm, mesh & mesh_);
     ~elasticity();
 
-    void assemblePureDirichlet_homogeneousForcing(Epetra_FECrsMatrix & K);
     void stiffness_homogeneousForcing(Epetra_FECrsMatrix & K);
 
     void solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & b, Epetra_Vector & u,

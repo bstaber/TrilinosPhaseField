@@ -3,7 +3,9 @@
 TPF::staggeredAlgorithm::staggeredAlgorithm(Epetra_Comm & comm, mesh & mesh_)
 : elasticity(comm, mesh_){
 
-  Lapack = new Epetra_LAPACK();
+  Lapack                        = new Epetra_LAPACK();
+  displacementSolutionOverlaped = new Epetra_Vector(*Mesh->OverlapMapU);
+  damageSolutionOverlaped       = new Epetra_Vector(*Mesh->OverlapMapD);
 }
 
 TPF::staggeredAlgorithm::~staggeredAlgorithm(){
@@ -49,11 +51,11 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
 
     bc_disp = (double(n)+1.0)*delta_u;
 
-    solve_u(matrix_u, rhs_u, lhs_u, ParametersList.sublist("Elasticity"), bc_disp);
+    solve_u(matrix_u, rhs_u, lhs_u, ParametersList, bc_disp);
 
     updateDamageHistory(damageHistory);
 
-    phaseFieldBVP->solve_d(matrix_d, rhs_d, lhs_d, ParametersList.sublist("Damage"), damageHistory);
+    phaseFieldBVP->solve_d(matrix_d, rhs_d, lhs_d, ParametersList, damageHistory);
 
     damageSolutionOverlaped->Import(lhs_d, *Mesh->ImportToOverlapMapD, Insert);
     displacementSolutionOverlaped->Import(lhs_u, *Mesh->ImportToOverlapMapU, Insert);
@@ -68,7 +70,7 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
       int error_u = print_solution(lhs_u, dispfile);
       int error_d = phaseFieldBVP->print_solution(lhs_d, damgfile);
     }
-
+    
   }
 
 }

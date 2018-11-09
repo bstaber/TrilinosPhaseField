@@ -85,15 +85,15 @@ void TPF::damage::solve_d(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epetra_
 
   assemble(A, rhs, damageHistory);
 
-  double tol   = Teuchos::getParameter<double>(Parameters.sublist("Aztec"), "AZ_tol");
-  int max_iter = Teuchos::getParameter<int>(Parameters.sublist("Aztec"), "AZ_max_iter");
+  double tol   = Teuchos::getParameter<double>(Parameters.sublist("Damage").sublist("Aztec"), "AZ_tol");
+  int max_iter = Teuchos::getParameter<int>(Parameters.sublist("Damage").sublist("Aztec"), "AZ_max_iter");
 
   lhs.PutScalar(0.0);
 
   Epetra_LinearProblem problem(&A, &lhs, &rhs);
 
   AztecOO solver(problem);
-  solver.SetParameters(Parameters.sublist("Aztec"));
+  solver.SetParameters(Parameters.sublist("Damage").sublist("Aztec"));
   solver.Iterate(max_iter, tol);
 }
 

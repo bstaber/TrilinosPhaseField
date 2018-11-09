@@ -47,7 +47,7 @@ int main(int argc, char *argv[]){
   example->setup_dirichlet_conditions();
 
   bool opt_print = Teuchos::getParameter<bool>(Parameters->sublist("Mesh"), "print");
-  //example->staggeredAlgorithmDirichletBC(*Parameters, opt_print);
+  example->staggeredAlgorithmDirichletBC(*Parameters, opt_print);
 
 #ifdef HAVE_MPI
     MPI_Finalize();

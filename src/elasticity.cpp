@@ -9,19 +9,9 @@ TPF::elasticity::~elasticity(){
 
 }
 
-void TPF::elasticity::assemblePureDirichlet_homogeneousForcing(Epetra_FECrsMatrix & K){
+void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
 
   K.PutScalar(0.0);
-
-  stiffness_homogeneousForcing(K);
-
-  Comm->Barrier();
-
-  K.GlobalAssemble();
-  K.FillComplete();
-}
-
-void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
 
   int node, e_gid, error;
   int n_gauss_points = Mesh->n_gauss_cells;
@@ -38,8 +28,7 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
   Epetra_SerialDenseMatrix B_times_TM(3*Mesh->el_type,6);
 
   Epetra_SerialDenseVector epsilon(6);
-  Epetra_SerialDenseVector u(6);
-
+  Epetra_SerialDenseVector u(3*Mesh->el_type);
 
   double phi = 0.0;
 
@@ -51,6 +40,7 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
           dx_shape_functions(inode,0) = Mesh->DX_N_cells(inode,e_lid);
           dx_shape_functions(inode,1) = Mesh->DY_N_cells(inode,e_lid);
           dx_shape_functions(inode,2) = Mesh->DZ_N_cells(inode,e_lid);
+
           for (int iddl=0; iddl<3; ++iddl){
               Indices_cells[3*inode+iddl] = 3*node+iddl;
               u(3*inode+iddl) = displacementSolutionOverlaped[0][Mesh->OverlapMapU->LID(3*node+iddl)];
@@ -60,6 +50,7 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
                   }
               }
           }
+
       }
 
       compute_B_matrices(dx_shape_functions, matrix_B);
@@ -75,8 +66,8 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
 
           get_elasticity_tensor(tangent_matrix, epsilon, phi);
 
-          error = B_times_TM.Multiply('T','N',gauss_weight*Mesh->detJac_cells(e_lid,gp),matrix_B,tangent_matrix,0.0);
-          error = Ke.Multiply('N','N',1.0,B_times_TM,matrix_B,1.0);
+          error = B_times_TM.Multiply('T', 'N', gauss_weight*Mesh->detJac_cells(e_lid,gp), matrix_B, tangent_matrix, 0.0);
+          error = Ke.Multiply('N', 'N', 1.0, B_times_TM, matrix_B, 1.0);
       }
 
       for (unsigned int i=0; i<3*Mesh->el_type; ++i){
@@ -84,8 +75,14 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
               error = K.SumIntoGlobalValues(1, &Indices_cells[i], 1, &Indices_cells[j], &Ke(i,j));
           }
       }
+
   }
   delete[] Indices_cells;
+
+  Comm->Barrier();
+
+  K.GlobalAssemble();
+  K.FillComplete();
 }
 
 void TPF::elasticity::solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epetra_Vector & lhs,
@@ -94,17 +91,19 @@ void TPF::elasticity::solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epe
   rhs.PutScalar(0.0);
   lhs.PutScalar(0.0);
 
-  assemblePureDirichlet_homogeneousForcing(A);
+  stiffness_homogeneousForcing(A);
+
   apply_dirichlet_conditions(A, rhs, bc_disp);
 
-  int max_iter = Teuchos::getParameter<int>(Parameters.sublist("Aztec"), "AZ_max_iter");
-  double tol   = Teuchos::getParameter<double>(Parameters.sublist("Aztec"), "AZ_tol");
+  int max_iter = Teuchos::getParameter<int>(Parameters.sublist("Elasticity").sublist("Aztec"), "AZ_max_iter");
+  double tol   = Teuchos::getParameter<double>(Parameters.sublist("Elasticity").sublist("Aztec"), "AZ_tol");
 
   Epetra_LinearProblem problem(&A, &lhs, &rhs);
 
   AztecOO solver(problem);
-  solver.SetParameters(Parameters.sublist("Aztec"));
+  solver.SetParameters(Parameters.sublist("Elasticity").sublist("Aztec"));
   solver.Iterate(max_iter, tol);
+
 }
 
 void TPF::elasticity::compute_B_matrices(Epetra_SerialDenseMatrix & dx_shape_functions, Epetra_SerialDenseMatrix & B){
