@@ -124,7 +124,15 @@ void TPF::staggeredAlgorithm::updateDamageHistory(Epetra_Vector & damageHistory)
 
 void TPF::staggeredAlgorithm::get_elasticity_tensor(Epetra_SerialDenseMatrix & elasticity_matrix, Epetra_SerialDenseVector & epsilon, double & phi){
 
-// implement this, use Epetra_LAPACK.
-// Lapack->SPEV(...);
+  char jobz = 'V';
+  char uplo = 'U';
+  int n = 3;
+  double *ap;     // packed lower or upper triangular part of the matrix
+  double *w;      // eigenvalues
+  double *z;      // eigenvectors
+  double *WORK;
+  int    *INFO;
+
+  Lapack->SPEV(jobz, uplo, n, ap, w, z, n, WORK, INFO);
 
 }
