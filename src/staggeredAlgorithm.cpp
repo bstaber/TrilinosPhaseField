@@ -14,9 +14,10 @@ TPF::staggeredAlgorithm::~staggeredAlgorithm(){
 
 void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterList & ParametersList, bool print){
 
+  std::string path = Teuchos::getParameter<std::string>(ParametersList.sublist("Mesh"), "path_to_results");
+
   gc = Teuchos::getParameter<double>(ParametersList.sublist("Damage"), "gc");
   lc = Teuchos::getParameter<double>(ParametersList.sublist("Damage"), "lc");
-
   Teuchos::RCP<damage> phaseFieldBVP = Teuchos::rcp(new damage(*Comm, *Mesh, gc, lc));
 
   double delta_u  = Teuchos::getParameter<double>(ParametersList.sublist("Elasticity"), "delta_u");
@@ -65,12 +66,12 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
     }
 
     if (print){
-      std::string dispfile = "/home/s/staber/Trilinos_results/examples/phasefield/displacement" + std::to_string(int(n)) + ".mtx";
-      std::string damgfile = "/home/s/staber/Trilinos_results/examples/phasefield/damage"       + std::to_string(int(n)) + ".mtx";
+      std::string dispfile = path + "displacement" + std::to_string(int(n)) + ".mtx";
+      std::string damgfile = path + "damage"       + std::to_string(int(n)) + ".mtx";
       int error_u = print_solution(lhs_u, dispfile);
       int error_d = phaseFieldBVP->print_solution(lhs_d, damgfile);
     }
-    
+
   }
 
 }
