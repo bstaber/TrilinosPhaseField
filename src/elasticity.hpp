@@ -49,6 +49,7 @@ namespace TPF {
     virtual void get_elasticity_tensor(Epetra_SerialDenseMatrix & elasticity_matrix, Epetra_SerialDenseVector & epsilon, double & phi) = 0;
 
     Epetra_Vector * displacementSolutionOverlaped;
+    Epetra_Vector * damageSolutionOverlaped;
 
     unsigned int n_bc_dof;
     int * dof_on_boundary;

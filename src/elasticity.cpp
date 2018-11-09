@@ -68,6 +68,11 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K){
       for (unsigned int gp=0; gp<n_gauss_points; ++gp){
           gauss_weight = Mesh->gauss_weight_cells(gp);
 
+          for (unsigned inode=0; inode<4; ++inode){
+            node = Mesh->cells_nodes[Mesh->el_type*e_gid+inode];
+            phi += Mesh->N_cells(inode,gp)*damageSolutionOverlaped[0][Mesh->OverlapMapD->LID(node)];
+          }
+
           get_elasticity_tensor(tangent_matrix, epsilon, phi);
 
           error = B_times_TM.Multiply('T','N',gauss_weight*Mesh->detJac_cells(e_lid,gp),matrix_B,tangent_matrix,0.0);

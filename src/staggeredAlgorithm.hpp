@@ -27,17 +27,11 @@ namespace TPF {
 
     void get_elasticity_tensor(Epetra_SerialDenseMatrix & elasticity_matrix, Epetra_SerialDenseVector & epsilon, double & phi);
 
-    /*
-    mesh        * Mesh;
-    Epetra_Comm * Comm;
-    */
-
     Teuchos::RCP<damage> phaseFieldBVP;
 
     double gc, lc;
     double lambda, mu;
 
-    Epetra_Vector * damageSolutionOverlaped;
     Epetra_LAPACK * Lapack;
 
   };
