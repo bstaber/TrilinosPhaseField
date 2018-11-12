@@ -23,6 +23,10 @@
 
 #include "Epetra_LAPACK.h"
 
+#include "ml_MultiLevelPreconditioner.h"
+#include "ml_epetra_utils.h"
+#include "ml_include.h"
+
 #include "mesh.hpp"
 
 namespace TPF {
@@ -30,13 +34,15 @@ namespace TPF {
   class elasticity
   {
   public:
-    elasticity(Epetra_Comm & comm, mesh & mesh_);
+    elasticity(Epetra_Comm & comm, mesh & mesh_, double & lambda, double & mu);
     ~elasticity();
 
     void stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, Epetra_Vector & v, Epetra_Vector & phi);
 
-    Epetra_Vector solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & b, Epetra_Vector & u,
+    void solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & b, Epetra_Vector & u, Epetra_Vector & v,
                  Teuchos::ParameterList & Parameters, double & bc_disp, Epetra_Vector & phi);
+
+    void updateDamageHistory(Epetra_Vector & damageHistory, Epetra_Vector & u);
 
     void compute_B_matrices(Epetra_SerialDenseMatrix & dx_shape_functions, Epetra_SerialDenseMatrix & B);
 
@@ -50,8 +56,11 @@ namespace TPF {
     double lambda = 0.0;
     double mu = 0.0;
 
-    virtual void setup_dirichlet_conditions() = 0;
-    virtual void apply_dirichlet_conditions(Epetra_FECrsMatrix & K, Epetra_FEVector & F, double & displacement) = 0;
+    unsigned int n_bc_dof;
+    int * dof_on_boundary;
+
+    void setup_dirichlet_conditions();
+    void apply_dirichlet_conditions(Epetra_FECrsMatrix & K, Epetra_FEVector & F, double & displacement);
 
     Epetra_LAPACK * Lapack;
   };

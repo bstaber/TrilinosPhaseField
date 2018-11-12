@@ -1,10 +1,15 @@
 #include "elasticity.hpp"
 
-TPF::elasticity::elasticity(Epetra_Comm & comm, mesh & mesh_){
+TPF::elasticity::elasticity(Epetra_Comm & comm, mesh & mesh_, double & lambda_, double & mu_){
   Mesh = &mesh_;
   Comm = &comm;
 
   Lapack = new Epetra_LAPACK();
+
+  lambda = lambda_;
+  mu = mu_;
+
+  setup_dirichlet_conditions();
 }
 
 TPF::elasticity::~elasticity(){
@@ -87,36 +92,20 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, Epetr
   K.FillComplete();
 }
 
-Epetra_Vector TPF::elasticity::solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epetra_Vector & u,
+void TPF::elasticity::solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epetra_Vector & lhs, Epetra_Vector & v,
                               Teuchos::ParameterList & Parameters, double & bc_disp, Epetra_Vector & phi){
 
-
-  Epetra_Vector v(*Mesh->OverlapMapU);
-  v.Import(u, *Mesh->ImportToOverlapMapU, Insert);
-
   stiffness_homogeneousForcing(A, v, phi);
-
-  rhs.PutScalar(0.0);
   apply_dirichlet_conditions(A, rhs, bc_disp);
 
   int max_iter = Teuchos::getParameter<int>(Parameters.sublist("Elasticity").sublist("Aztec"), "AZ_max_iter");
   double tol   = Teuchos::getParameter<double>(Parameters.sublist("Elasticity").sublist("Aztec"), "AZ_tol");
 
-  Epetra_Vector lhs(*Mesh->StandardMapU);
-  lhs.PutScalar(0.0);
-  Epetra_LinearProblem problem;
-  AztecOO solver;
-
-  problem.SetOperator(&A);
-  problem.SetLHS(&lhs);
-  problem.SetRHS(&rhs);
-
-  solver.SetProblem(problem);
-  solver.SetParameters(Parameters);
+  Epetra_LinearProblem problem(&A, &lhs, &rhs);
+  AztecOO solver(problem);
 
   solver.SetParameters(Parameters.sublist("Elasticity").sublist("Aztec"));
   solver.Iterate(max_iter, tol);
-  return lhs;
 }
 
 void TPF::elasticity::compute_B_matrices(Epetra_SerialDenseMatrix & dx_shape_functions, Epetra_SerialDenseMatrix & B){
@@ -325,5 +314,130 @@ void TPF::elasticity::get_elasticity_tensor(Epetra_SerialDenseMatrix & elasticit
   elasticity_matrix.Scale(gphi);
 
   elasticity_matrix += elasticity_neg;
+}
+
+void TPF::elasticity::setup_dirichlet_conditions(){
+
+  // example of how the setup should be implemented
+  // this should be simplified or hidden in next versions
+
+  n_bc_dof = 0;
+  double z;
+  int node;
+
+  // get the total number of prescribed dof
+  for (unsigned int i=0; i<Mesh->n_local_nodes_without_ghosts; ++i){
+      node = Mesh->local_nodes[i];
+      z    = Mesh->nodes_coord[3*node+2]; // where do you want
+      if(z<=1.0e-6 && z>=-1.0e-6){        // to apply Dirichlet conditions ?
+          n_bc_dof+=3;                    // how many dof at this location ?
+      }
+      if(z<=10+1.0e-6 && z>=10-1.0e-6){   // how many dof at this location ?
+          n_bc_dof+=1;
+      }
+  }
+
+  // store the prescibred dof into a vector dof_on_boundary
+  int indbc = 0;
+  dof_on_boundary = new int [n_bc_dof];
+  for (unsigned int inode=0; inode<Mesh->n_local_nodes_without_ghosts; ++inode){
+      node = Mesh->local_nodes[inode];
+      z    = Mesh->nodes_coord[3*node+2];
+      if (z<=1.0e-6 && z>=-1.0e-6){
+          dof_on_boundary[indbc+0] = 3*inode+0;
+          dof_on_boundary[indbc+1] = 3*inode+1;
+          dof_on_boundary[indbc+2] = 3*inode+2;
+          indbc+=3;
+      }
+      if (z<=10+1.0e-6 && z>=10-1.0e-6){
+          dof_on_boundary[indbc+0] = 3*inode+2;
+          indbc+=1;
+      }
+  }
+
+}
+
+void TPF::elasticity::apply_dirichlet_conditions(Epetra_FECrsMatrix & K, Epetra_FEVector & F, double & displacement){
+
+  // example of how dirichlet conditions should be applied
+  // this should be simplified or hidden in next versions
+
+  Epetra_MultiVector v(*Mesh->StandardMapU,true);
+  v.PutScalar(0.0);
+
+  int node;
+  double z;
+  for (unsigned int inode=0; inode<Mesh->n_local_nodes_without_ghosts; ++inode){
+      node = Mesh->local_nodes[inode];
+      z    = Mesh->nodes_coord[3*node+2];
+      if (z<=10+1.0e-6 && z>=10-1.0e-6){
+          v[0][Mesh->StandardMapU->LID(3*node+2)] = displacement;
+      }
+  }
+
+  Epetra_MultiVector rhs_dir(*Mesh->StandardMapU,true);
+  K.Apply(v,rhs_dir);
+  F.Update(-1.0,rhs_dir,1.0);
+
+  for (unsigned int inode=0; inode<Mesh->n_local_nodes_without_ghosts; ++inode){
+      node = Mesh->local_nodes[inode];
+      z    = Mesh->nodes_coord[3*node+2];
+      if (z<=1.0e-6 && z>=-1.0e-6){
+          F[0][Mesh->StandardMapU->LID(3*node+0)] = 0.0;
+          F[0][Mesh->StandardMapU->LID(3*node+1)] = 0.0;
+          F[0][Mesh->StandardMapU->LID(3*node+2)] = 0.0;
+      }
+      if (z<=10+1.0e-6 && z>=10-1.0e-6){
+          F[0][Mesh->StandardMapU->LID(3*node+2)] = displacement;
+      }
+  }
+  //}
+  ML_Epetra::Apply_OAZToMatrix(dof_on_boundary,n_bc_dof,K);
+}
+
+void TPF::elasticity::updateDamageHistory(Epetra_Vector & damageHistory, Epetra_Vector & u){
+
+  Epetra_Vector v(*Mesh->OverlapMapU);
+  v.Import(u, *Mesh->ImportToOverlapMapU, Insert);
+
+  int n_gauss_points = Mesh->n_gauss_cells;
+
+  double trepsilon, trepsilon2, potential, history;
+
+  Epetra_SerialDenseMatrix dx_shape_functions(Mesh->el_type,3);
+  Epetra_SerialDenseMatrix matrix_B(6,3*Mesh->el_type);
+  Epetra_SerialDenseVector cells_u(3*Mesh->el_type);
+  Epetra_SerialDenseVector epsilon(6);
+
+  int egid, node, id;
+  for (unsigned int elid=0; elid<Mesh->n_local_cells; ++elid){
+
+    egid = Mesh->local_cells[elid];
+
+    for (unsigned int inode=0; inode<Mesh->el_type; ++inode){
+      node = Mesh->cells_nodes[Mesh->el_type*egid+inode];
+      dx_shape_functions(inode,0) = Mesh->DX_N_cells(inode,elid);
+      dx_shape_functions(inode,1) = Mesh->DY_N_cells(inode,elid);
+      dx_shape_functions(inode,2) = Mesh->DZ_N_cells(inode,elid);
+      for (unsigned int ddl=0; ddl<3; ++ddl){
+        id = 3*node+ddl;
+        cells_u(3*inode+ddl) = v[Mesh->OverlapMapU->LID(id)];
+      }
+    }
+
+    compute_B_matrices(dx_shape_functions,matrix_B);
+    epsilon.Multiply('N', 'N', 1.0, matrix_B,cells_u, 0.0);
+
+    trepsilon  = epsilon(0) + epsilon(1) + epsilon(2);
+    trepsilon2 = epsilon(0)*epsilon(0) + epsilon(1)*epsilon(1) + epsilon(2)*epsilon(2) +
+                 0.5*epsilon(3)*epsilon(3) + 0.5*epsilon(4)*epsilon(4) + 0.5*epsilon(5)*epsilon(5);
+
+    history   = damageHistory[elid];
+    potential = (lambda/2.0)*trepsilon*trepsilon + mu*trepsilon2;
+
+    if (potential>history){
+      damageHistory[elid] = potential;
+    }
+  }
 
 }

@@ -33,8 +33,7 @@ namespace TPF {
     damage(Epetra_Comm & comm, mesh & mesh_, double & gc_, double & lc_);
     ~damage();
 
-    void assemble(Epetra_FECrsMatrix & matrix, Epetra_FEVector & rhs,
-                  Epetra_Vector & damageHistory);
+    void assemble(Epetra_FECrsMatrix & matrix, Epetra_FEVector & rhs, Epetra_Vector & damageHistory);
 
     void solve_d(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epetra_Vector & lhs,
                  Teuchos::ParameterList & Parameters, Epetra_Vector & damageHistory);

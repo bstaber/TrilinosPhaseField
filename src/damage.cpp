@@ -91,8 +91,8 @@ void TPF::damage::solve_d(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epetra_
   lhs.PutScalar(0.0);
 
   Epetra_LinearProblem problem(&A, &lhs, &rhs);
-
   AztecOO solver(problem);
+  
   solver.SetParameters(Parameters.sublist("Damage").sublist("Aztec"));
   solver.Iterate(max_iter, tol);
 }

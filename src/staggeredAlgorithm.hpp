@@ -13,7 +13,7 @@
 
 namespace TPF {
 
-  class staggeredAlgorithm : public elasticity
+  class staggeredAlgorithm
   {
 
   public:
@@ -28,6 +28,9 @@ namespace TPF {
     Teuchos::RCP<damage> phaseFieldBVP;
 
     double gc, lc;
+
+    mesh * Mesh;
+    Epetra_Comm * Comm;
 
   };
 }
