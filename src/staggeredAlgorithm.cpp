@@ -42,16 +42,17 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
   Epetra_Map ElementMap(-1, Mesh->n_local_cells, &Mesh->local_cells[0], 0, *Comm);
   Epetra_Vector damageHistory(ElementMap);
 
-  if (Comm->MyPID()==0){
-    std::cout << "step" << std::setw(15) << "cpu_time (s)" << "\n";
-  }
-
   double bc_disp = 0.0;
   damageHistory.PutScalar(0.0);
 
   lhs_d.PutScalar(0.0);
   lhs_u.PutScalar(0.0);
 
+  if (Comm->MyPID()==0){
+    std::cout << "step" << std::setw(15) << "cpu_time (s)" << "\n";
+  }
+
+  Epetra_Vector u(*Mesh->StandardMapU);
   for (int n=0; n<n_steps; ++n){
 
     Time.ResetStartTime();
@@ -59,8 +60,10 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
     bc_disp = (double(n)+1.0)*delta_u;
 
     phi.Import(lhs_d, *Mesh->ImportToOverlapMapD, Insert);
+    u = lhs_u;
 
-    solve_u(matrix_u, rhs_u, lhs_u, ParametersList, bc_disp, phi);
+    lhs_u = solve_u(matrix_u, rhs_u, u, ParametersList, bc_disp, phi);
+
 
     updateDamageHistory(damageHistory, lhs_u);
 

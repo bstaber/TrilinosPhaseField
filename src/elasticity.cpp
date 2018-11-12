@@ -87,12 +87,12 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, Epetr
   K.FillComplete();
 }
 
-void TPF::elasticity::solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epetra_Vector & lhs,
+Epetra_Vector TPF::elasticity::solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epetra_Vector & u,
                               Teuchos::ParameterList & Parameters, double & bc_disp, Epetra_Vector & phi){
 
 
   Epetra_Vector v(*Mesh->OverlapMapU);
-  v.Import(lhs, *Mesh->ImportToOverlapMapU, Insert);
+  v.Import(u, *Mesh->ImportToOverlapMapU, Insert);
 
   stiffness_homogeneousForcing(A, v, phi);
 
@@ -102,6 +102,7 @@ void TPF::elasticity::solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epe
   int max_iter = Teuchos::getParameter<int>(Parameters.sublist("Elasticity").sublist("Aztec"), "AZ_max_iter");
   double tol   = Teuchos::getParameter<double>(Parameters.sublist("Elasticity").sublist("Aztec"), "AZ_tol");
 
+  Epetra_Vector lhs(*Mesh->StandardMapU);
   lhs.PutScalar(0.0);
   Epetra_LinearProblem problem;
   AztecOO solver;
@@ -115,7 +116,7 @@ void TPF::elasticity::solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epe
 
   solver.SetParameters(Parameters.sublist("Elasticity").sublist("Aztec"));
   solver.Iterate(max_iter, tol);
-
+  return lhs;
 }
 
 void TPF::elasticity::compute_B_matrices(Epetra_SerialDenseMatrix & dx_shape_functions, Epetra_SerialDenseMatrix & B){
