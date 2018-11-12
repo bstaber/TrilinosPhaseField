@@ -27,7 +27,7 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
   int n_steps     = Teuchos::getParameter<int>(ParametersList.sublist("Elasticity"), "n_steps");
 
   Epetra_Time Time(*Comm);
-
+  
   Epetra_FECrsMatrix matrix_d(Copy,*Mesh->FEGraphD);
   Epetra_FECrsMatrix matrix_u(Copy,*Mesh->FEGraphU);
 
