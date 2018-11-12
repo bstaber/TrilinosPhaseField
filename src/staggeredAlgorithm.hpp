@@ -23,7 +23,7 @@ namespace TPF {
 
     void staggeredAlgorithmDirichletBC(Teuchos::ParameterList & ParametersList, bool print);
 
-    void updateDamageHistory(Epetra_Vector & damageHistory, Epetra_Vector & v);
+    void updateDamageHistory(Epetra_Vector & damageHistory, Epetra_Vector & u);
 
     Teuchos::RCP<damage> phaseFieldBVP;
 

@@ -27,7 +27,7 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
   int n_steps     = Teuchos::getParameter<int>(ParametersList.sublist("Elasticity"), "n_steps");
 
   Epetra_Time Time(*Comm);
-  
+
   Epetra_FECrsMatrix matrix_d(Copy,*Mesh->FEGraphD);
   Epetra_FECrsMatrix matrix_u(Copy,*Mesh->FEGraphU);
 
@@ -36,6 +36,8 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
 
   Epetra_Vector      lhs_d(*Mesh->StandardMapD);
   Epetra_Vector      lhs_u(*Mesh->StandardMapU);
+
+  Epetra_Vector phi(*Mesh->OverlapMapD);
 
   Epetra_Map ElementMap(-1, Mesh->n_local_cells, &Mesh->local_cells[0], 0, *Comm);
   Epetra_Vector damageHistory(ElementMap);
@@ -47,9 +49,6 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
   double bc_disp = 0.0;
   damageHistory.PutScalar(0.0);
 
-  Epetra_Vector v(*Mesh->OverlapMapU);
-  Epetra_Vector phi(*Mesh->OverlapMapD);
-
   lhs_d.PutScalar(0.0);
   lhs_u.PutScalar(0.0);
 
@@ -60,11 +59,10 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
     bc_disp = (double(n)+1.0)*delta_u;
 
     phi.Import(lhs_d, *Mesh->ImportToOverlapMapD, Insert);
-    v.Import(lhs_u, *Mesh->ImportToOverlapMapU, Insert); // this seems to be a problem
 
-    solve_u(matrix_u, rhs_u, lhs_u, ParametersList, bc_disp, v, phi);
+    solve_u(matrix_u, rhs_u, lhs_u, ParametersList, bc_disp, phi);
 
-    updateDamageHistory(damageHistory, v);
+    updateDamageHistory(damageHistory, lhs_u);
 
     phaseFieldBVP->solve_d(matrix_d, rhs_d, lhs_d, ParametersList, damageHistory);
 
@@ -82,7 +80,10 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
 
 }
 
-void TPF::staggeredAlgorithm::updateDamageHistory(Epetra_Vector & damageHistory, Epetra_Vector & v){
+void TPF::staggeredAlgorithm::updateDamageHistory(Epetra_Vector & damageHistory, Epetra_Vector & u){
+
+  Epetra_Vector v(*Mesh->OverlapMapU);
+  v.Import(u, *Mesh->ImportToOverlapMapU, Insert);
 
   int n_gauss_points = Mesh->n_gauss_cells;
 

@@ -88,22 +88,31 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, Epetr
 }
 
 void TPF::elasticity::solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epetra_Vector & lhs,
-                              Teuchos::ParameterList & Parameters, double & bc_disp,
-                              Epetra_Vector & v, Epetra_Vector & phi){
+                              Teuchos::ParameterList & Parameters, double & bc_disp, Epetra_Vector & phi){
 
-  rhs.PutScalar(0.0);
-  lhs.PutScalar(0.0);
+
+  Epetra_Vector v(*Mesh->OverlapMapU);
+  v.Import(lhs, *Mesh->ImportToOverlapMapU, Insert);
 
   stiffness_homogeneousForcing(A, v, phi);
 
+  rhs.PutScalar(0.0);
   apply_dirichlet_conditions(A, rhs, bc_disp);
 
   int max_iter = Teuchos::getParameter<int>(Parameters.sublist("Elasticity").sublist("Aztec"), "AZ_max_iter");
   double tol   = Teuchos::getParameter<double>(Parameters.sublist("Elasticity").sublist("Aztec"), "AZ_tol");
 
-  Epetra_LinearProblem problem(&A, &lhs, &rhs);
+  lhs.PutScalar(0.0);
+  Epetra_LinearProblem problem;
+  AztecOO solver;
 
-  AztecOO solver(problem);
+  problem.SetOperator(&A);
+  problem.SetLHS(&lhs);
+  problem.SetRHS(&rhs);
+
+  solver.SetProblem(problem);
+  solver.SetParameters(Parameters);
+
   solver.SetParameters(Parameters.sublist("Elasticity").sublist("Aztec"));
   solver.Iterate(max_iter, tol);
 
