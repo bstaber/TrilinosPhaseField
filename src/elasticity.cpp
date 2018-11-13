@@ -9,8 +9,6 @@ TPF::elasticity::elasticity(Epetra_Comm & comm, mesh & mesh_, double & lambda_, 
   lambda = lambda_;
   mu = mu_;
 
-  setup_dirichlet_conditions();
-
   StandardMap        = new Epetra_Map(-1, 3*Mesh->n_local_nodes_without_ghosts, &Mesh->local_dof_without_ghosts[0], 0, *Comm);
   OverlapMap         = new Epetra_Map(-1, 3*Mesh->n_local_nodes, &Mesh->local_dof[0], 0, *Comm);
   ImportToOverlapMap = new Epetra_Import(*OverlapMap, *StandardMap);
@@ -36,6 +34,8 @@ TPF::elasticity::elasticity(Epetra_Comm & comm, mesh & mesh_, double & lambda_, 
   Comm->Barrier();
   FEGraph->GlobalAssemble();
   delete [] indexU;
+
+  setup_dirichlet_conditions();
 }
 
 TPF::elasticity::~elasticity(){
@@ -121,6 +121,8 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, Epetr
 
 void TPF::elasticity::solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epetra_Vector & lhs, Epetra_Vector & v, Epetra_Vector & w,
                               Epetra_Map & OverlapMapD, Teuchos::ParameterList & Parameters, double & bc_disp){
+
+  rhs.PutScalar(0.0);
 
   stiffness_homogeneousForcing(A, v, w, OverlapMapD);
   apply_dirichlet_conditions(A, rhs, bc_disp);
@@ -466,8 +468,8 @@ void TPF::elasticity::updateDamageHistory(Epetra_Vector & damageHistory, Epetra_
       }
     }
 
-    compute_B_matrices(dx_shape_functions,matrix_B);
-    epsilon.Multiply('N', 'N', 1.0, matrix_B,cells_u, 0.0);
+    compute_B_matrices(dx_shape_functions, matrix_B);
+    epsilon.Multiply('N', 'N', 1.0, matrix_B, cells_u, 0.0);
 
     trepsilon  = epsilon(0) + epsilon(1) + epsilon(2);
     trepsilon2 = epsilon(0)*epsilon(0) + epsilon(1)*epsilon(1) + epsilon(2)*epsilon(2) +

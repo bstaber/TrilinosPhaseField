@@ -71,19 +71,17 @@ void TPF::damage::assemble(Epetra_FECrsMatrix & matrix, Epetra_FEVector & rhs, E
         ke(inode,jnode) = 0.0;
         me(inode,jnode) = 0.0;
       }
-
-      for (unsigned int gp=0; gp<n_gauss_points; ++gp){
-        gauss_weight = Mesh->gauss_weight_cells(gp);
-        for (unsigned int inode=0; inode<Mesh->el_type; ++inode){
-          shape_functions(inode) = Mesh->N_cells(inode,gp);
-          fe(inode) += gauss_weight*2.0*he*shape_functions(inode)*Mesh->detJac_cells(eloc);
-        }
-        me.Multiply('N','T',gauss_weight,shape_functions,shape_functions,1.0);
-      }
-      me.Scale(ae*Mesh->detJac_cells(eloc));
-      ke.Multiply('N','T',be*Mesh->vol_cells(eloc),dx_shape_functions,dx_shape_functions,0.0);
-      ke += me;
     }
+    for (unsigned int gp=0; gp<n_gauss_points; ++gp){
+      gauss_weight = Mesh->gauss_weight_cells(gp);
+      for (unsigned int inode=0; inode<Mesh->el_type; ++inode){
+        shape_functions(inode) = Mesh->N_cells(inode,gp);
+        fe(inode) += gauss_weight*2.0*he*shape_functions(inode)*Mesh->detJac_cells(eloc);
+      }
+      me.Multiply('N','T',ae*gauss_weight*Mesh->detJac_cells(eloc),shape_functions,shape_functions,1.0);
+    }
+    ke.Multiply('N','T',be*Mesh->vol_cells(eloc),dx_shape_functions,dx_shape_functions,0.0);
+    ke += me;
 
     for (unsigned int inode=0; inode<Mesh->el_type; ++inode){
       rhs.SumIntoGlobalValues(1, &index[inode], &fe(inode));

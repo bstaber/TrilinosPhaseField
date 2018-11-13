@@ -74,13 +74,12 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
       std::cout << n << std::setw(15) << Time.ElapsedTime() << "\n";
     }
 
-    std::string dispfile = path + "displacement" + std::to_string(int(n)) + ".mtx";
-    std::string damgfile = path + "damage"       + std::to_string(int(n)) + ".mtx";
-
-    int error_u = elasticityBVP->print_solution(lhs_u, dispfile);
-    int error_d = phaseFieldBVP->print_solution(lhs_d, damgfile);
-
-
   }
+
+  std::string dispfile = path + "displacement" + std::to_string(int(n_steps)) + ".mtx";
+  std::string damgfile = path + "damage"       + std::to_string(int(n_steps)) + ".mtx";
+
+  int error_u = elasticityBVP->print_solution(lhs_u, dispfile);
+  int error_d = phaseFieldBVP->print_solution(lhs_d, damgfile);
 
 }

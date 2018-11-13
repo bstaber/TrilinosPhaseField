@@ -1,10 +1,10 @@
 // Gmsh project created on Sun Sep 23 18:09:47 2018
 SetFactory("OpenCASCADE");
 
-lc1 = 0.5;
-lc2 = 0.5;
+lc1 = 0.25;
+lc2 = 0.05;
 
-H = 0.1;
+H = 0.001;
 
 a = 2;
 b = 5;
