@@ -4,7 +4,7 @@ SetFactory("OpenCASCADE");
 lc1 = 0.5;
 lc2 = 0.5;
 
-H = 0.001;
+H = 0.1;
 
 a = 2;
 b = 5;

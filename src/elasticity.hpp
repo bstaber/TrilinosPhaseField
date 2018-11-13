@@ -39,8 +39,8 @@ namespace TPF {
 
     void stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, Epetra_Vector & v, Epetra_Vector & phi);
 
-    void solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & b, Epetra_Vector & u, Epetra_Vector & v,
-                 Teuchos::ParameterList & Parameters, double & bc_disp, Epetra_Vector & phi);
+    void solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & b, Epetra_Vector & u, Epetra_Vector & v, Epetra_Vector & w,
+                 Teuchos::ParameterList & Parameters, double & bc_disp);
 
     void updateDamageHistory(Epetra_Vector & damageHistory, Epetra_Vector & u);
 

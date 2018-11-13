@@ -288,7 +288,7 @@ void TPF::mesh::jacobian_matrix(Epetra_SerialDenseMatrix & X, Epetra_SerialDense
 }
 
 void TPF::mesh::jacobian_det(Epetra_SerialDenseMatrix & JacobianMatrix, double & jac){
-    jac = std::fabs(JacobianMatrix(0,0)*JacobianMatrix(1,1)*JacobianMatrix(2,2)-JacobianMatrix(0,0)*JacobianMatrix(1,2)*JacobianMatrix(2,1)-JacobianMatrix(0,1)*JacobianMatrix(1,0)*JacobianMatrix(2,2)+JacobianMatrix(0,1)*JacobianMatrix(1,2)*JacobianMatrix(2,0)+JacobianMatrix(0,2)*JacobianMatrix(1,0)*JacobianMatrix(2,1)-JacobianMatrix(0,2)*JacobianMatrix(1,1)*JacobianMatrix(2,0) );
+  jac = std::fabs(JacobianMatrix(0,0)*JacobianMatrix(1,1)*JacobianMatrix(2,2)-JacobianMatrix(0,0)*JacobianMatrix(1,2)*JacobianMatrix(2,1)-JacobianMatrix(0,1)*JacobianMatrix(1,0)*JacobianMatrix(2,2)+JacobianMatrix(0,1)*JacobianMatrix(1,2)*JacobianMatrix(2,0)+JacobianMatrix(0,2)*JacobianMatrix(1,0)*JacobianMatrix(2,1)-JacobianMatrix(0,2)*JacobianMatrix(1,1)*JacobianMatrix(2,0) );
 }
 
 void TPF::mesh::set_gauss_points(int ngp, Epetra_SerialDenseVector & weight, Epetra_SerialDenseVector & xi, Epetra_SerialDenseVector & eta, Epetra_SerialDenseVector & zeta){
@@ -373,10 +373,10 @@ void TPF::mesh::computeFE(){
 
         for (unsigned int inode=0; inode<el_type; ++inode){
             node = cells_nodes[el_type*eglob+inode];
-            X(0,inode) = nodes_coord[3*node];
+            X(0,inode) = nodes_coord[3*node+0];
             X(1,inode) = nodes_coord[3*node+1];
             X(2,inode) = nodes_coord[3*node+2];
-            local_rows(3*el_type*eloc+3*inode)   = 3*node;
+            local_rows(3*el_type*eloc+3*inode+0) = 3*node+0;
             local_rows(3*el_type*eloc+3*inode+1) = 3*node+1;
             local_rows(3*el_type*eloc+3*inode+2) = 3*node+2;
         }

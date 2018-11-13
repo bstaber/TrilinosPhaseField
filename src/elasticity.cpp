@@ -68,7 +68,7 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, Epetr
 
           for (unsigned inode=0; inode<4; ++inode){
             node = Mesh->cells_nodes[Mesh->el_type*e_gid+inode];
-            pf += Mesh->N_cells(inode,gp)*phi[Mesh->OverlapMapD->LID(node)];
+            pf  += Mesh->N_cells(inode,gp)*phi[Mesh->OverlapMapD->LID(node)];
           }
 
           get_elasticity_tensor(tangent_matrix, epsilon, pf);
@@ -84,6 +84,7 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, Epetr
       }
 
   }
+
   delete[] Indices_cells;
 
   Comm->Barrier();
@@ -92,10 +93,10 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, Epetr
   K.FillComplete();
 }
 
-void TPF::elasticity::solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epetra_Vector & lhs, Epetra_Vector & v,
-                              Teuchos::ParameterList & Parameters, double & bc_disp, Epetra_Vector & phi){
+void TPF::elasticity::solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epetra_Vector & lhs, Epetra_Vector & v, Epetra_Vector & w,
+                              Teuchos::ParameterList & Parameters, double & bc_disp){
 
-  stiffness_homogeneousForcing(A, v, phi);
+  stiffness_homogeneousForcing(A, v, w);
   apply_dirichlet_conditions(A, rhs, bc_disp);
 
   int max_iter = Teuchos::getParameter<int>(Parameters.sublist("Elasticity").sublist("Aztec"), "AZ_max_iter");
@@ -111,27 +112,27 @@ void TPF::elasticity::solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epe
 void TPF::elasticity::compute_B_matrices(Epetra_SerialDenseMatrix & dx_shape_functions, Epetra_SerialDenseMatrix & B){
 
   for (unsigned inode=0; inode<Mesh->el_type; ++inode){
-    B(0,3*inode) = dx_shape_functions(inode,0);
+    B(0,3*inode+0) = dx_shape_functions(inode,0);
     B(0,3*inode+1) = 0.0;
     B(0,3*inode+2) = 0.0;
 
-    B(1,3*inode) = 0.0;
+    B(1,3*inode+0) = 0.0;
     B(1,3*inode+1) = dx_shape_functions(inode,1);
     B(1,3*inode+2) = 0.0;
 
-    B(2,3*inode) = 0.0;
+    B(2,3*inode+0) = 0.0;
     B(2,3*inode+1) = 0.0;
     B(2,3*inode+2) = dx_shape_functions(inode,2);
 
-    B(3,3*inode) = 0.0;
+    B(3,3*inode+0) = 0.0;
     B(3,3*inode+1) = dx_shape_functions(inode,2);
     B(3,3*inode+2) = dx_shape_functions(inode,1);
 
-    B(4,3*inode) = dx_shape_functions(inode,2);
+    B(4,3*inode+0) = dx_shape_functions(inode,2);
     B(4,3*inode+1) = 0.0;
     B(4,3*inode+2) = dx_shape_functions(inode,0);
 
-    B(5,3*inode) = dx_shape_functions(inode,1);
+    B(5,3*inode+0) = dx_shape_functions(inode,1);
     B(5,3*inode+1) = dx_shape_functions(inode,0);
     B(5,3*inode+2) = 0.0;
   }
@@ -152,8 +153,22 @@ int TPF::elasticity::print_solution(Epetra_Vector & solution, std::string filena
 
 void TPF::elasticity::get_elasticity_tensor(Epetra_SerialDenseMatrix & elasticity_matrix, Epetra_SerialDenseVector & epsilon, double & phi){
 
+  double c11 = lambda+2.0*mu;
+  double c12 = lambda;
+  double c44 = mu;
+
+  elasticity_matrix(0,0) = c11; elasticity_matrix(0,1) = c12; elasticity_matrix(0,2) = c12; elasticity_matrix(0,3) = 0.0; elasticity_matrix(0,4) = 0.0; elasticity_matrix(0,5) = 0.0;
+  elasticity_matrix(1,0) = c12; elasticity_matrix(1,1) = c11; elasticity_matrix(1,2) = c12; elasticity_matrix(1,3) = 0.0; elasticity_matrix(1,4) = 0.0; elasticity_matrix(1,5) = 0.0;
+  elasticity_matrix(2,0) = c12; elasticity_matrix(2,1) = c12; elasticity_matrix(2,2) = c11; elasticity_matrix(2,3) = 0.0; elasticity_matrix(2,4) = 0.0; elasticity_matrix(2,5) = 0.0;
+  elasticity_matrix(3,0) = 0.0; elasticity_matrix(3,1) = 0.0; elasticity_matrix(3,2) = 0.0; elasticity_matrix(3,3) = c44; elasticity_matrix(3,4) = 0.0; elasticity_matrix(3,5) = 0.0;
+  elasticity_matrix(4,0) = 0.0; elasticity_matrix(4,1) = 0.0; elasticity_matrix(4,2) = 0.0; elasticity_matrix(4,3) = 0.0; elasticity_matrix(4,4) = c44; elasticity_matrix(4,5) = 0.0;
+  elasticity_matrix(5,0) = 0.0; elasticity_matrix(5,1) = 0.0; elasticity_matrix(5,2) = 0.0; elasticity_matrix(5,3) = 0.0; elasticity_matrix(5,4) = 0.0; elasticity_matrix(5,5) = c44;
+
   double gphi = (1.0-phi)*(1.0-phi) + 1.0e-6;
 
+  elasticity_matrix.Scale(gphi);
+
+  /*
   char jobz = 'V';
   char uplo = 'U';
 
@@ -314,6 +329,7 @@ void TPF::elasticity::get_elasticity_tensor(Epetra_SerialDenseMatrix & elasticit
   elasticity_matrix.Scale(gphi);
 
   elasticity_matrix += elasticity_neg;
+  */
 }
 
 void TPF::elasticity::setup_dirichlet_conditions(){
@@ -327,14 +343,14 @@ void TPF::elasticity::setup_dirichlet_conditions(){
 
   // get the total number of prescribed dof
   for (unsigned int i=0; i<Mesh->n_local_nodes_without_ghosts; ++i){
-      node = Mesh->local_nodes[i];
-      z    = Mesh->nodes_coord[3*node+2]; // where do you want
-      if(z<=1.0e-6 && z>=-1.0e-6){        // to apply Dirichlet conditions ?
-          n_bc_dof+=3;                    // how many dof at this location ?
-      }
-      if(z<=10+1.0e-6 && z>=10-1.0e-6){   // how many dof at this location ?
-          n_bc_dof+=1;
-      }
+    node = Mesh->local_nodes[i];
+    z    = Mesh->nodes_coord[3*node+2]; // where do you want
+    if(z<=1.0e-6 && z>=-1.0e-6){        // to apply Dirichlet conditions ?
+        n_bc_dof+=3;                    // how many dof at this location ?
+    }
+    if(z<=10+1.0e-6 && z>=10-1.0e-6){   // how many dof at this location ?
+        n_bc_dof+=1;
+    }
   }
 
   // store the prescibred dof into a vector dof_on_boundary

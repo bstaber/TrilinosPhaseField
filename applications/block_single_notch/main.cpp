@@ -42,10 +42,12 @@ int main(int argc, char *argv[]){
   std::string filename = Teuchos::getParameter<std::string>(Parameters->sublist("Mesh"), "filename");
   TPF::mesh mesh(Comm, filename, 1.0);
 
+
   Teuchos::RCP<TPF::staggeredAlgorithm> example = Teuchos::rcp(new TPF::staggeredAlgorithm(Comm, mesh));
 
   bool opt_print = Teuchos::getParameter<bool>(Parameters->sublist("Mesh"), "print");
   example->staggeredAlgorithmDirichletBC(*Parameters, opt_print);
+  
 
 #ifdef HAVE_MPI
     MPI_Finalize();

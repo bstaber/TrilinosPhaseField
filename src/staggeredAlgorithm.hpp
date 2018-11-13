@@ -26,8 +26,7 @@ namespace TPF {
     void updateDamageHistory(Epetra_Vector & damageHistory, Epetra_Vector & u);
 
     Teuchos::RCP<damage> phaseFieldBVP;
-
-    double gc, lc;
+    Teuchos::RCP<damage> elasticityBVP;
 
     mesh * Mesh;
     Epetra_Comm * Comm;

@@ -77,7 +77,6 @@ void TPF::damage::assemble(Epetra_FECrsMatrix & matrix, Epetra_FEVector & rhs,
   rhs.GlobalAssemble();
 
   delete [] index;
-
 }
 
 void TPF::damage::solve_d(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epetra_Vector & lhs,
@@ -92,7 +91,7 @@ void TPF::damage::solve_d(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epetra_
 
   Epetra_LinearProblem problem(&A, &lhs, &rhs);
   AztecOO solver(problem);
-  
+
   solver.SetParameters(Parameters.sublist("Damage").sublist("Aztec"));
   solver.Iterate(max_iter, tol);
 }
