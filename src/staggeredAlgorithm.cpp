@@ -16,10 +16,10 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
   double gc = Teuchos::getParameter<double>(ParametersList.sublist("Damage"), "gc");
   double lc = Teuchos::getParameter<double>(ParametersList.sublist("Damage"), "lc");
 
-  double E  = Teuchos::getParameter<double>(ParametersList.sublist("Elasticity"), "young");
-  double nu = Teuchos::getParameter<double>(ParametersList.sublist("Elasticity"), "poisson");
-  double lambda = E*nu/((1.0+nu)*(1.0-2.0*nu));
-  double mu     = E/(2.0*(1.0+nu));
+  double young  = Teuchos::getParameter<double>(ParametersList.sublist("Elasticity"), "young");
+  double nu     = Teuchos::getParameter<double>(ParametersList.sublist("Elasticity"), "poisson");
+  double lambda = young*nu/((1.0+nu)*(1.0-2.0*nu));
+  double mu     = young/(2.0*(1.0+nu));
 
   Teuchos::RCP<damage> phaseFieldBVP = Teuchos::rcp(new damage(*Comm, *Mesh, gc, lc));
   Teuchos::RCP<elasticity> elasticityBVP = Teuchos::rcp(new elasticity(*Comm, *Mesh, lambda, mu));
@@ -61,14 +61,13 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
 
     bc_disp = (double(n)+1.0)*delta_u;
 
-    v.Import(lhs_u, *elasticityBVP->ImportToOverlapMap, Insert);
-    w.Import(lhs_d, *phaseFieldBVP->ImportToOverlapMap, Insert);
-
     elasticityBVP->solve_u(matrix_u, rhs_u, lhs_u, v, w, *phaseFieldBVP->OverlapMap, ParametersList, bc_disp);
+    v.Import(lhs_u, *elasticityBVP->ImportToOverlapMap, Insert);
 
-    elasticityBVP->updateDamageHistory(damageHistory, lhs_u);
+    elasticityBVP->updateDamageHistory(damageHistory, v);
 
     phaseFieldBVP->solve_d(matrix_d, rhs_d, lhs_d, ParametersList, damageHistory);
+    w.Import(lhs_d, *phaseFieldBVP->ImportToOverlapMap, Insert);
 
     if (Comm->MyPID()==0){
       std::cout << n << std::setw(15) << Time.ElapsedTime() << "\n";

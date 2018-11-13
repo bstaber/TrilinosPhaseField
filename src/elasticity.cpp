@@ -438,10 +438,7 @@ void TPF::elasticity::apply_dirichlet_conditions(Epetra_FECrsMatrix & K, Epetra_
   ML_Epetra::Apply_OAZToMatrix(dof_on_boundary,n_bc_dof,K);
 }
 
-void TPF::elasticity::updateDamageHistory(Epetra_Vector & damageHistory, Epetra_Vector & u){
-
-  Epetra_Vector v(*OverlapMap);
-  v.Import(u, *ImportToOverlapMap, Insert);
+void TPF::elasticity::updateDamageHistory(Epetra_Vector & damageHistory, Epetra_Vector & v){
 
   int n_gauss_points = Mesh->n_gauss_cells;
 

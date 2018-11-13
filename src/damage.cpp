@@ -29,7 +29,6 @@ gc(gc_), lc(lc_){
   Comm->Barrier();
   FEGraph->GlobalAssemble();
   delete [] indexD;
-
 }
 
 TPF::damage::~damage(){
@@ -45,7 +44,6 @@ void TPF::damage::assemble(Epetra_FECrsMatrix & matrix, Epetra_FEVector & rhs, E
 
   Epetra_SerialDenseMatrix dx_shape_functions(Mesh->el_type,3);
   Epetra_SerialDenseMatrix ke(Mesh->el_type, Mesh->el_type);
-  Epetra_SerialDenseMatrix me(Mesh->el_type, Mesh->el_type);
 
   int eglob, id;
   int n_gauss_points = Mesh->n_gauss_cells;
@@ -69,19 +67,18 @@ void TPF::damage::assemble(Epetra_FECrsMatrix & matrix, Epetra_FEVector & rhs, E
       fe(inode) = 0.0;
       for (int jnode; jnode<Mesh->el_type; ++jnode){
         ke(inode,jnode) = 0.0;
-        me(inode,jnode) = 0.0;
       }
     }
+    
     for (unsigned int gp=0; gp<n_gauss_points; ++gp){
       gauss_weight = Mesh->gauss_weight_cells(gp);
       for (unsigned int inode=0; inode<Mesh->el_type; ++inode){
         shape_functions(inode) = Mesh->N_cells(inode,gp);
         fe(inode) += gauss_weight*2.0*he*shape_functions(inode)*Mesh->detJac_cells(eloc);
       }
-      me.Multiply('N','T',ae*gauss_weight*Mesh->detJac_cells(eloc),shape_functions,shape_functions,1.0);
+      ke.Multiply('N','T',ae*gauss_weight*Mesh->detJac_cells(eloc),shape_functions,shape_functions,1.0);
     }
-    ke.Multiply('N','T',be*Mesh->vol_cells(eloc),dx_shape_functions,dx_shape_functions,0.0);
-    ke += me;
+    ke.Multiply('N','T',be*Mesh->vol_cells(eloc),dx_shape_functions,dx_shape_functions,1.0);
 
     for (unsigned int inode=0; inode<Mesh->el_type; ++inode){
       rhs.SumIntoGlobalValues(1, &index[inode], &fe(inode));

@@ -40,6 +40,9 @@ namespace TPF {
 
     int print_solution(Epetra_Vector & lhs, std::string filename);
 
+    double gc;
+    double lc;
+
     mesh        * Mesh;
     Epetra_Comm * Comm;
 
@@ -47,9 +50,6 @@ namespace TPF {
     Epetra_Map        *StandardMap;
     Epetra_Import     *ImportToOverlapMap;
     Epetra_FECrsGraph *FEGraph;
-
-    double gc;
-    double lc;
   };
 
 }
