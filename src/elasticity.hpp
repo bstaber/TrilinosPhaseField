@@ -37,9 +37,9 @@ namespace TPF {
     elasticity(Epetra_Comm & comm, mesh & mesh_, double & lambda, double & mu);
     ~elasticity();
 
-    void stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, Epetra_Vector & v, Epetra_Vector & phi);
+    void stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, Epetra_Vector & v, Epetra_Vector & phi, Epetra_Map & OverlapMapD);
 
-    void solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & b, Epetra_Vector & u, Epetra_Vector & v, Epetra_Vector & w,
+    void solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & b, Epetra_Vector & u, Epetra_Vector & v, Epetra_Vector & w, Epetra_Map & OverlapMapD, 
                  Teuchos::ParameterList & Parameters, double & bc_disp);
 
     void updateDamageHistory(Epetra_Vector & damageHistory, Epetra_Vector & u);
@@ -52,6 +52,11 @@ namespace TPF {
 
     mesh        * Mesh;
     Epetra_Comm * Comm;
+
+    Epetra_Map        *OverlapMap;
+    Epetra_Map        *StandardMap;
+    Epetra_Import     *ImportToOverlapMap;
+    Epetra_FECrsGraph *FEGraph;
 
     double lambda = 0.0;
     double mu = 0.0;

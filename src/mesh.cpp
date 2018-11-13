@@ -13,9 +13,10 @@ TPF::mesh::mesh(Epetra_Comm & comm, std::string & filename, double scaling){
     set_gauss_points(4, gauss_weight_cells, xi_cells, eta_cells, zeta_cells);
 
     computeFE();
-
+    /*
     build_EpetraMaps();
     build_FECrsGraphs();
+    */
 }
 
 TPF::mesh::~mesh(){
@@ -394,6 +395,7 @@ void TPF::mesh::computeFE(){
     }
 }
 
+/*
 void TPF::mesh::build_EpetraMaps(){
 
   StandardMapU        = new Epetra_Map(-1, 3*n_local_nodes_without_ghosts, &local_dof_without_ghosts[0], 0, *Comm);
@@ -452,3 +454,4 @@ void TPF::mesh::build_FECrsGraphs(){
   delete [] indexD;
 
 }
+*/

@@ -10,13 +10,39 @@ TPF::elasticity::elasticity(Epetra_Comm & comm, mesh & mesh_, double & lambda_, 
   mu = mu_;
 
   setup_dirichlet_conditions();
+
+  StandardMap        = new Epetra_Map(-1, 3*Mesh->n_local_nodes_without_ghosts, &Mesh->local_dof_without_ghosts[0], 0, *Comm);
+  OverlapMap         = new Epetra_Map(-1, 3*Mesh->n_local_nodes, &Mesh->local_dof[0], 0, *Comm);
+  ImportToOverlapMap = new Epetra_Import(*OverlapMap, *StandardMap);
+
+  FEGraph = new Epetra_FECrsGraph(Copy,*StandardMap,100);
+  int * indexU = new int [3*Mesh->el_type];
+  int eglob, node;
+  for (int e_lid=0; e_lid<Mesh->n_local_cells; ++e_lid){
+      eglob = Mesh->local_cells[e_lid];
+      for (int inode=0; inode<Mesh->el_type; ++inode){
+          node = Mesh->cells_nodes[Mesh->el_type*eglob+inode];
+          for (int ddl=0; ddl<3; ++ddl){
+              indexU[3*inode+ddl] = 3*node+ddl;
+          }
+      }
+      for (int i=0; i<3*Mesh->el_type; ++i){
+          for (int j=0; j<3*Mesh->el_type; ++j){
+              FEGraph->InsertGlobalIndices(1, &indexU[i], 1, &indexU[j]);
+          }
+      }
+
+  }
+  Comm->Barrier();
+  FEGraph->GlobalAssemble();
+  delete [] indexU;
 }
 
 TPF::elasticity::~elasticity(){
 
 }
 
-void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, Epetra_Vector & v, Epetra_Vector & phi){
+void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, Epetra_Vector & v, Epetra_Vector & phi, Epetra_Map & OverlapMapD){
 
   K.PutScalar(0.0);
 
@@ -49,7 +75,7 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, Epetr
 
           for (int iddl=0; iddl<3; ++iddl){
               Indices_cells[3*inode+iddl] = 3*node+iddl;
-              u(3*inode+iddl) = v[Mesh->OverlapMapU->LID(3*node+iddl)];
+              u(3*inode+iddl) = v[OverlapMap->LID(3*node+iddl)];
               for (unsigned int jnode=0; jnode<Mesh->el_type; ++jnode){
                   for (int jddl=0; jddl<3; ++jddl){
                       Ke(3*inode+iddl,3*jnode+jddl) = 0.0;
@@ -68,7 +94,7 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, Epetr
 
           for (unsigned inode=0; inode<4; ++inode){
             node = Mesh->cells_nodes[Mesh->el_type*e_gid+inode];
-            pf  += Mesh->N_cells(inode,gp)*phi[Mesh->OverlapMapD->LID(node)];
+            pf  += Mesh->N_cells(inode,gp)*phi[OverlapMapD.LID(node)];
           }
 
           get_elasticity_tensor(tangent_matrix, epsilon, pf);
@@ -94,9 +120,9 @@ void TPF::elasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, Epetr
 }
 
 void TPF::elasticity::solve_u(Epetra_FECrsMatrix & A, Epetra_FEVector & rhs, Epetra_Vector & lhs, Epetra_Vector & v, Epetra_Vector & w,
-                              Teuchos::ParameterList & Parameters, double & bc_disp){
+                              Epetra_Map & OverlapMapD, Teuchos::ParameterList & Parameters, double & bc_disp){
 
-  stiffness_homogeneousForcing(A, v, w);
+  stiffness_homogeneousForcing(A, v, w, OverlapMapD);
   apply_dirichlet_conditions(A, rhs, bc_disp);
 
   int max_iter = Teuchos::getParameter<int>(Parameters.sublist("Elasticity").sublist("Aztec"), "AZ_max_iter");
@@ -144,7 +170,7 @@ int TPF::elasticity::print_solution(Epetra_Vector & solution, std::string filena
       NumTargetElements = 3*Mesh->n_nodes;
   }
   Epetra_Map MapOnRoot(-1,NumTargetElements,0,*Comm);
-  Epetra_Export ExportOnRoot(*Mesh->StandardMapU,MapOnRoot);
+  Epetra_Export ExportOnRoot(*StandardMap,MapOnRoot);
   Epetra_MultiVector lhs_root(MapOnRoot,true);
   lhs_root.Export(solution,ExportOnRoot,Insert);
   int error = EpetraExt::MultiVectorToMatrixMarketFile(filename.c_str(),lhs_root,0,0,false);
@@ -378,7 +404,7 @@ void TPF::elasticity::apply_dirichlet_conditions(Epetra_FECrsMatrix & K, Epetra_
   // example of how dirichlet conditions should be applied
   // this should be simplified or hidden in next versions
 
-  Epetra_MultiVector v(*Mesh->StandardMapU,true);
+  Epetra_MultiVector v(*StandardMap,true);
   v.PutScalar(0.0);
 
   int node;
@@ -387,11 +413,11 @@ void TPF::elasticity::apply_dirichlet_conditions(Epetra_FECrsMatrix & K, Epetra_
       node = Mesh->local_nodes[inode];
       z    = Mesh->nodes_coord[3*node+2];
       if (z<=10+1.0e-6 && z>=10-1.0e-6){
-          v[0][Mesh->StandardMapU->LID(3*node+2)] = displacement;
+          v[0][StandardMap->LID(3*node+2)] = displacement;
       }
   }
 
-  Epetra_MultiVector rhs_dir(*Mesh->StandardMapU,true);
+  Epetra_MultiVector rhs_dir(*StandardMap,true);
   K.Apply(v,rhs_dir);
   F.Update(-1.0,rhs_dir,1.0);
 
@@ -399,12 +425,12 @@ void TPF::elasticity::apply_dirichlet_conditions(Epetra_FECrsMatrix & K, Epetra_
       node = Mesh->local_nodes[inode];
       z    = Mesh->nodes_coord[3*node+2];
       if (z<=1.0e-6 && z>=-1.0e-6){
-          F[0][Mesh->StandardMapU->LID(3*node+0)] = 0.0;
-          F[0][Mesh->StandardMapU->LID(3*node+1)] = 0.0;
-          F[0][Mesh->StandardMapU->LID(3*node+2)] = 0.0;
+          F[0][StandardMap->LID(3*node+0)] = 0.0;
+          F[0][StandardMap->LID(3*node+1)] = 0.0;
+          F[0][StandardMap->LID(3*node+2)] = 0.0;
       }
       if (z<=10+1.0e-6 && z>=10-1.0e-6){
-          F[0][Mesh->StandardMapU->LID(3*node+2)] = displacement;
+          F[0][StandardMap->LID(3*node+2)] = displacement;
       }
   }
   //}
@@ -413,8 +439,8 @@ void TPF::elasticity::apply_dirichlet_conditions(Epetra_FECrsMatrix & K, Epetra_
 
 void TPF::elasticity::updateDamageHistory(Epetra_Vector & damageHistory, Epetra_Vector & u){
 
-  Epetra_Vector v(*Mesh->OverlapMapU);
-  v.Import(u, *Mesh->ImportToOverlapMapU, Insert);
+  Epetra_Vector v(*OverlapMap);
+  v.Import(u, *ImportToOverlapMap, Insert);
 
   int n_gauss_points = Mesh->n_gauss_cells;
 
@@ -437,7 +463,7 @@ void TPF::elasticity::updateDamageHistory(Epetra_Vector & damageHistory, Epetra_
       dx_shape_functions(inode,2) = Mesh->DZ_N_cells(inode,elid);
       for (unsigned int ddl=0; ddl<3; ++ddl){
         id = 3*node+ddl;
-        cells_u(3*inode+ddl) = v[Mesh->OverlapMapU->LID(id)];
+        cells_u(3*inode+ddl) = v[OverlapMap->LID(id)];
       }
     }
 

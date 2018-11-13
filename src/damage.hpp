@@ -43,6 +43,11 @@ namespace TPF {
     mesh        * Mesh;
     Epetra_Comm * Comm;
 
+    Epetra_Map        *OverlapMap;
+    Epetra_Map        *StandardMap;
+    Epetra_Import     *ImportToOverlapMap;
+    Epetra_FECrsGraph *FEGraph;
+
     double gc;
     double lc;
   };

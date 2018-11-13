@@ -29,17 +29,18 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
 
   Epetra_Time Time(*Comm);
 
-  Epetra_FECrsMatrix matrix_d(Copy,*Mesh->FEGraphD);
-  Epetra_FECrsMatrix matrix_u(Copy,*Mesh->FEGraphU);
+  Epetra_FECrsMatrix matrix_d(Copy,*phaseFieldBVP->FEGraph);
+  Epetra_FECrsMatrix matrix_u(Copy,*elasticityBVP->FEGraph);
 
-  Epetra_FEVector    rhs_d(*Mesh->StandardMapD);
-  Epetra_FEVector    rhs_u(*Mesh->StandardMapU);
+  Epetra_FEVector    rhs_d(*phaseFieldBVP->StandardMap);
+  Epetra_FEVector    rhs_u(*elasticityBVP->StandardMap);
 
-  Epetra_Vector      lhs_d(*Mesh->StandardMapD);
-  Epetra_Vector      lhs_u(*Mesh->StandardMapU);
+  Epetra_Vector      lhs_d(*phaseFieldBVP->StandardMap);
+  Epetra_Vector      lhs_u(*elasticityBVP->StandardMap);
 
-  Epetra_Vector      v(*Mesh->OverlapMapU);
-  Epetra_Vector      w(*Mesh->OverlapMapD);
+  Epetra_Vector      w(*phaseFieldBVP->OverlapMap);
+  Epetra_Vector      v(*elasticityBVP->OverlapMap);
+
 
   Epetra_Map ElementMap(-1, Mesh->n_local_cells, &Mesh->local_cells[0], 0, *Comm);
   Epetra_Vector damageHistory(ElementMap);
@@ -60,10 +61,10 @@ void TPF::staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterLi
 
     bc_disp = (double(n)+1.0)*delta_u;
 
-    v.Import(lhs_u,   *Mesh->ImportToOverlapMapU, Insert);
-    w.Import(lhs_d, *Mesh->ImportToOverlapMapD, Insert);
+    v.Import(lhs_u, *elasticityBVP->ImportToOverlapMap, Insert);
+    w.Import(lhs_d, *phaseFieldBVP->ImportToOverlapMap, Insert);
 
-    elasticityBVP->solve_u(matrix_u, rhs_u, lhs_u, v, w, ParametersList, bc_disp);
+    elasticityBVP->solve_u(matrix_u, rhs_u, lhs_u, v, w, *phaseFieldBVP->OverlapMap, ParametersList, bc_disp);
 
     elasticityBVP->updateDamageHistory(damageHistory, lhs_u);
 

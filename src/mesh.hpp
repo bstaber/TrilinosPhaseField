@@ -47,16 +47,11 @@ class mesh{
     void set_gauss_points(int ngp, Epetra_SerialDenseVector & weight, Epetra_SerialDenseVector & xi, Epetra_SerialDenseVector & eta, Epetra_SerialDenseVector & zeta);
 
     void computeFE();
-
+    /*
     void build_FECrsGraphs();
     void build_EpetraMaps();
-
+    */
     Epetra_Comm * Comm;
-
-    Epetra_Map        *OverlapMapU,  *OverlapMapD;
-    Epetra_Map        *StandardMapU, *StandardMapD;
-    Epetra_Import     *ImportToOverlapMapU, *ImportToOverlapMapD;
-    Epetra_FECrsGraph *FEGraphU, *FEGraphD;
 
     Epetra_SerialDenseVector local_rows, vol_cells, detJac_cells;
     Epetra_SerialDenseMatrix N_cells, DX_N_cells, DY_N_cells, DZ_N_cells;
