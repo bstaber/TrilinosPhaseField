@@ -191,7 +191,6 @@ void TPF::elasticity::get_elasticity_tensor(Epetra_SerialDenseMatrix & elasticit
   elasticity_matrix(5,0) = 0.0; elasticity_matrix(5,1) = 0.0; elasticity_matrix(5,2) = 0.0; elasticity_matrix(5,3) = 0.0; elasticity_matrix(5,4) = 0.0; elasticity_matrix(5,5) = c44;
 
   double gphi = (1.0-phi)*(1.0-phi) + 1.0e-6;
-
   elasticity_matrix.Scale(gphi);
 
   /*
