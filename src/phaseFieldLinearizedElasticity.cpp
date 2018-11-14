@@ -220,8 +220,3 @@ void phaseFieldLinearizedElasticity::get_elasticity_tensor(unsigned int & e_lid,
   tangent_matrix = elasticity;
   tangent_matrix.Scale(g);
 }
-
-void phaseFieldLinearizedElasticity::get_elasticity_tensor_for_recovery(unsigned int & e_lid,
-                                                                        Epetra_SerialDenseMatrix & tangent_matrix){
-  std::cout << "Not using this method yet.\n";
-}

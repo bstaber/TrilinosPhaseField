@@ -1,3 +1,7 @@
+/*
+Brian Staber (brian.staber@gmail.com)
+*/
+
 #include "Epetra_ConfigDefs.h"
 #ifdef HAVE_MPI
 #include "mpi.h"
@@ -7,19 +11,22 @@
 #endif
 
 #include "Teuchos_RCP.hpp"
+#include "Ifpack.h"
+#include "Ifpack_AdditiveSchwarz.h"
 #include "Teuchos_StandardCatchMacros.hpp"
 #include "Teuchos_ParameterList.hpp"
 #include "Teuchos_XMLParameterListCoreHelpers.hpp"
-#include "Teuchos_CommandLineProcessor.hpp"
 
-#include "staggeredAlgorithm.hpp"
+#include "phaseFieldProblem.hpp"
+
+#include "Teuchos_CommandLineProcessor.hpp"
 
 int main(int argc, char *argv[]){
 
-  std::string xmlInFileName = "";
+  std::string    xmlInFileName = "";
 
-  Teuchos::CommandLineProcessor clp(false);
-  clp.setOption("parameters",&xmlInFileName,"The XML file to read into a parameter list");
+  Teuchos::CommandLineProcessor  clp(false);
+  clp.setOption("xml-in-file",&xmlInFileName,"The XML file to read into a parameter list");
   clp.setDocString("TO DO.");
 
   Teuchos::CommandLineProcessor::EParseCommandLineReturn
@@ -29,29 +36,27 @@ int main(int argc, char *argv[]){
       return parse_return;
   }
 
-  #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
-    Epetra_MpiComm Comm(MPI_COMM_WORLD);
-  #else
-    Epetra_SerialComm Comm;
-  #endif
-
-  Teuchos::RCP<Teuchos::ParameterList> Parameters = Teuchos::rcp(new Teuchos::ParameterList);
-  Teuchos::updateParametersFromXmlFile(xmlInFileName, inoutArg(*Parameters));
-
-  std::string filename = Teuchos::getParameter<std::string>(Parameters->sublist("Mesh"), "filename");
-  TPF::mesh mesh(Comm, filename, 1.0);
-
-
-  Teuchos::RCP<TPF::staggeredAlgorithm> example = Teuchos::rcp(new TPF::staggeredAlgorithm(Comm, mesh));
-
-  bool opt_print = Teuchos::getParameter<bool>(Parameters->sublist("Mesh"), "print");
-  example->staggeredAlgorithmDirichletBC(*Parameters, opt_print);
-  
-
 #ifdef HAVE_MPI
-    MPI_Finalize();
+MPI_Init(&argc, &argv);
+  Epetra_MpiComm Comm(MPI_COMM_WORLD);
+#else
+  Epetra_SerialComm Comm;
 #endif
-return 0;
 
+  Teuchos::RCP<Teuchos::ParameterList> paramList = Teuchos::rcp(new Teuchos::ParameterList);
+  if(xmlInFileName.length()) {
+      Teuchos::updateParametersFromXmlFile(xmlInFileName, inoutArg(*paramList));
+  }
+  if (Comm.MyPID()==0){
+      paramList->print(std::cout,2,true,true);
+  }
+
+  Teuchos::RCP<phaseFieldProblem> phaseFieldModel = Teuchos::rcp(new phaseFieldProblem(Comm, *paramList));
+
+  phaseFieldModel->staggeredAlgorithmDirichletBC(*paramList, true);
+
+  #ifdef HAVE_MPI
+      MPI_Finalize();
+  #endif
+  return 0;
 }

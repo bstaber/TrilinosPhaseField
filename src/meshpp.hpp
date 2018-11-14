@@ -62,9 +62,7 @@ public:
     void get_cells_and_ghosts(int & MyPID);
     Epetra_SerialDenseVector get_cartesian_coordinate(unsigned int & e_gid, unsigned int & gp);
 
-    void store_feinterp_faces();
     void store_feinterp_cells();
-    void update_store_feinterp_cells(Epetra_Vector & u, Epetra_Map & OverlapMap);
 
     Epetra_Comm* Comm;
 
