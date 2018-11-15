@@ -77,8 +77,9 @@ void staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterList & 
   }
 
   if (print){
-    std::string dispfile = "/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/srbeam/results/displacement" + std::to_string(int(n_steps)) + ".mtx";
-    std::string damgfile = "/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/srbeam/results/damage"       + std::to_string(int(n_steps)) + ".mtx";
+    std::string printpath = Teuchos::getParameter<std::string>(ParametersList.sublist("Mesh"),"printpath");
+    std::string dispfile  = printpath + "displacement" + std::to_string(int(n_steps)) + ".mtx";
+    std::string damgfile  = printpath + "damage"       + std::to_string(int(n_steps)) + ".mtx";
     int error_u = elasticInterface->print_solution(lhs_u, dispfile);
     int error_d = damageInterface->print_solution(lhs_d, damgfile);
   }

@@ -22,10 +22,7 @@ public:
   for (unsigned int i=0; i<Mesh->n_local_nodes_without_ghosts; ++i){
       node = Mesh->local_nodes[i];
       z    = Mesh->nodes_coord[3*node+2];
-      if(z==0.0){
-          n_bc_dof++;
-      }
-      if(z==1.0){
+      if(z==0.0 || z==1.0){
           n_bc_dof++;
       }
   }
@@ -35,11 +32,7 @@ public:
   for (unsigned int inode=0; inode<Mesh->n_local_nodes_without_ghosts; ++inode){
       node = Mesh->local_nodes[inode];
       z    = Mesh->nodes_coord[3*node+2];
-      if (z==0.0){
-          dof_on_boundary[indbc] = inode;
-          indbc++;
-      }
-      if (z==1.0){
+      if (z==0.0 || z==1.0){
           dof_on_boundary[indbc] = inode;
           indbc++;
       }
@@ -62,10 +55,7 @@ public:
   for (unsigned int inode=0; inode<Mesh->n_local_nodes_without_ghosts; ++inode){
       node = Mesh->local_nodes[inode];
       z    = Mesh->nodes_coord[3*node+2];
-      if (z==0.0){
-          F[0][StandardMap->LID(node)] = 0.0;
-      }
-      if (z==1.0){
+      if (z==0.0 || z==1.0){
           F[0][StandardMap->LID(node)] = 0.0;
       }
   }
