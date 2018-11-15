@@ -39,57 +39,6 @@ void elasticBVP::computeDisplacement(Teuchos::ParameterList & Parameters,
   solver.Iterate(max_iter, tol);
 }
 
-/*void elasticBVP::updateDamageHistory(Epetra_Vector & damageHistory,
-                                     Epetra_Vector & displacement,
-                                     Epetra_Map & GaussMap){
-
-  Epetra_Vector u(*OverlapMap);
-  u.Import(displacement, *ImportToOverlapMap, Insert);
-
-  int n_gauss_points = Mesh->n_gauss_cells;
-
-  double trepsilon, trepsilon2, potential, history;
-
-  Epetra_SerialDenseMatrix dx_shape_functions(Mesh->el_type,3);
-  Epetra_SerialDenseMatrix matrix_B(6,3*Mesh->el_type);
-  Epetra_SerialDenseVector cells_u(3*Mesh->el_type);
-  Epetra_SerialDenseVector epsilon(6);
-
-  int egid, node, id;
-  for (unsigned int elid=0; elid<Mesh->n_local_cells; ++elid){
-    egid = Mesh->local_cells[elid];
-    for (unsigned int inode=0; inode<Mesh->el_type; ++inode){
-      node = Mesh->cells_nodes[Mesh->el_type*egid+inode];
-      for (unsigned int ddl=0; ddl<3; ++ddl){
-        id = 3*node+ddl;
-        cells_u(3*inode+ddl) = u[OverlapMap->LID(id)];
-      }
-    }
-    for (unsigned int gp=0; gp<n_gauss_points; ++gp){
-        for (unsigned int inode=0; inode<Mesh->el_type; ++inode){
-            dx_shape_functions(inode,0) = Mesh->DX_N_cells(gp+n_gauss_points*inode,elid);
-            dx_shape_functions(inode,1) = Mesh->DY_N_cells(gp+n_gauss_points*inode,elid);
-            dx_shape_functions(inode,2) = Mesh->DZ_N_cells(gp+n_gauss_points*inode,elid);
-        }
-
-        compute_B_matrices(dx_shape_functions,matrix_B);
-        epsilon.Multiply('N','N',1.0,matrix_B,cells_u,0.0);
-
-        trepsilon  = epsilon(0) + epsilon(1) + epsilon(2);
-        trepsilon2 = epsilon(0)*epsilon(0) + epsilon(1)*epsilon(1) + epsilon(2)*epsilon(2) +
-                     0.5*epsilon(3)*epsilon(3) + 0.5*epsilon(4)*epsilon(4) + 0.5*epsilon(5)*epsilon(5);
-
-        id = n_gauss_points*egid+gp;
-        history   = damageHistory[GaussMap.LID(id)];
-        potential = (lambda/2.0)*trepsilon*trepsilon + mu*trepsilon2;
-        if (potential>history){
-          damageHistory[GaussMap.LID(id)] = potential;
-        }
-    }
-  }
-
-}*/
-
 Epetra_Map elasticBVP::constructGaussMap(){
   int e_gid;
   int n_local_cells = Mesh->n_local_cells;

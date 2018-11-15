@@ -27,13 +27,18 @@ public:
 
   void setup_dirichlet_conditions(){
 
+  double tol = 1.0e-8;
+
   n_bc_dof = 0;
   double z;
   int node;
   for (unsigned int i=0; i<Mesh->n_local_nodes_without_ghosts; ++i){
       node = Mesh->local_nodes[i];
       z    = Mesh->nodes_coord[3*node+2];
-      if(z==0.0 || z==1.0){
+      if(z<=tol && z>=-tol){
+          n_bc_dof++;
+      }
+      if(z<=1.0+tol && z>=1.0-tol){
           n_bc_dof++;
       }
   }
@@ -43,9 +48,13 @@ public:
   for (unsigned int inode=0; inode<Mesh->n_local_nodes_without_ghosts; ++inode){
       node = Mesh->local_nodes[inode];
       z    = Mesh->nodes_coord[3*node+2];
-      if (z==0.0 || z==1.0){
-          dof_on_boundary[indbc] = inode;
-          indbc++;
+      if(z<=tol && z>=-tol){
+        dof_on_boundary[indbc] = inode;
+        indbc++;
+      }
+      if(z<=1.0+tol && z>=1.0-tol){
+        dof_on_boundary[indbc] = inode;
+        indbc++;
       }
   }
 
@@ -63,10 +72,15 @@ public:
   K.Apply(v,rhs_dir);
   F.Update(-1.0,rhs_dir,1.0);
 
+  double tol = 1.0e-8;
+
   for (unsigned int inode=0; inode<Mesh->n_local_nodes_without_ghosts; ++inode){
       node = Mesh->local_nodes[inode];
       z    = Mesh->nodes_coord[3*node+2];
-      if (z==0.0 || z==1.0){
+      if(z<=tol && z>=-tol){
+          F[0][StandardMap->LID(node)] = 0.0;
+      }
+      if(z<=1.0+tol && z>=1.0-tol){
           F[0][StandardMap->LID(node)] = 0.0;
       }
   }

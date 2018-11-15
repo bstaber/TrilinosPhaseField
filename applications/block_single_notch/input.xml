@@ -1,7 +1,7 @@
 <ParameterList>
 
     <ParameterList name="Mesh">
-        <!--Parameter name="mesh_file" type="string" value="/Users/brian/Documents/GitHub/TrilinosUQComp/examples/phasefield/mesh_copy.msh"/-->
+        <Parameter name="printpath" type="string" value="/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/block_single_notch/results/"/>
         <Parameter name="mesh_file" type="string" value="/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/block_single_notch/block_single_notch.msh"/>
     </ParameterList>
 
