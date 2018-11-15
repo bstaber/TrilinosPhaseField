@@ -9,32 +9,10 @@ elasticBVP::elasticBVP(Epetra_Comm & comm, mesh & mesh_, Teuchos::ParameterList 
   Comm = &comm;
   Mesh = &mesh_;
 
-  gc = Teuchos::getParameter<double>(Parameters.sublist("Damage"), "gc");
-  lc = Teuchos::getParameter<double>(Parameters.sublist("Damage"), "lc");
-  E  = Teuchos::getParameter<double>(Parameters.sublist("Elasticity"), "young");
-  nu = Teuchos::getParameter<double>(Parameters.sublist("Elasticity"), "poisson");
-
-  damageInterface = Teuchos::rcp(new damageBVP(comm, *Mesh, gc, lc));
-
   StandardMap = new Epetra_Map(-1, 3*Mesh->n_local_nodes_without_ghosts, &Mesh->local_dof_without_ghosts[0], 0, *Comm);
   OverlapMap  = new Epetra_Map(-1, 3*Mesh->n_local_nodes, &Mesh->local_dof[0], 0, *Comm);
   ImportToOverlapMap = new Epetra_Import(*OverlapMap, *StandardMap);
   create_FECrsGraph();
-
-  lambda = E*nu/((1.0+nu)*(1.0-2.0*nu));
-  mu     = E/(2.0*(1.0+nu));
-
-  elasticity.Reshape(6,6);
-  double c11 = E*(1.0-nu)/((1.0+nu)*(1.0-2.0*nu));
-  double c12 = E*nu/((1.0+nu)*(1.0-2.0*nu));
-  double c44 = E/(2.0*(1.0+nu));
-
-  elasticity(0,0) = c11; elasticity(0,1) = c12; elasticity(0,2) = c12; elasticity(0,3) = 0.0; elasticity(0,4) = 0.0; elasticity(0,5) = 0.0;
-  elasticity(1,0) = c12; elasticity(1,1) = c11; elasticity(1,2) = c12; elasticity(1,3) = 0.0; elasticity(1,4) = 0.0; elasticity(1,5) = 0.0;
-  elasticity(2,0) = c12; elasticity(2,1) = c12; elasticity(2,2) = c11; elasticity(2,3) = 0.0; elasticity(2,4) = 0.0; elasticity(2,5) = 0.0;
-  elasticity(3,0) = 0.0; elasticity(3,1) = 0.0; elasticity(3,2) = 0.0; elasticity(3,3) = c44; elasticity(3,4) = 0.0; elasticity(3,5) = 0.0;
-  elasticity(4,0) = 0.0; elasticity(4,1) = 0.0; elasticity(4,2) = 0.0; elasticity(4,3) = 0.0; elasticity(4,4) = c44; elasticity(4,5) = 0.0;
-  elasticity(5,0) = 0.0; elasticity(5,1) = 0.0; elasticity(5,2) = 0.0; elasticity(5,3) = 0.0; elasticity(5,4) = 0.0; elasticity(5,5) = c44;
 
 }
 
@@ -61,7 +39,7 @@ void elasticBVP::computeDisplacement(Teuchos::ParameterList & Parameters,
   solver.Iterate(max_iter, tol);
 }
 
-void elasticBVP::updateDamageHistory(Epetra_Vector & damageHistory,
+/*void elasticBVP::updateDamageHistory(Epetra_Vector & damageHistory,
                                      Epetra_Vector & displacement,
                                      Epetra_Map & GaussMap){
 
@@ -110,7 +88,7 @@ void elasticBVP::updateDamageHistory(Epetra_Vector & damageHistory,
     }
   }
 
-}
+}*/
 
 Epetra_Map elasticBVP::constructGaussMap(){
   int e_gid;

@@ -13,6 +13,10 @@ public:
   ~damageProblem(){
   }
 
+  void get_fracture_energy(unsigned int & e_lid, unsigned int & gp, double & gc){
+
+  }
+
   void setup_dirichlet_conditions(){
     //std::cout << "No essential boundary conditions.\n";
   }

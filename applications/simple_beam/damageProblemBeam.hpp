@@ -14,6 +14,10 @@ public:
   ~damageProblemBeam(){
   }
 
+  void get_fracture_energy(unsigned int & e_lid, unsigned int & gp, double & gc){
+
+  }
+
   void setup_dirichlet_conditions(){
 
   n_bc_dof = 0;

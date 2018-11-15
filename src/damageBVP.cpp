@@ -18,6 +18,19 @@ gc(gc_), lc(lc_){
   create_FECrsGraph();
 }
 
+damageBVP::damageBVP(Epetra_Comm & comm, mesh & mesh_, double & lc_):
+lc(lc_){
+
+  Mesh               = &mesh_;
+  Comm               = Mesh->Comm;
+
+  StandardMap        = new Epetra_Map(-1, Mesh->n_local_nodes_without_ghosts, &Mesh->local_nodes_without_ghosts[0], 0, *Comm);
+  OverlapMap         = new Epetra_Map(-1, Mesh->n_local_nodes, &Mesh->local_nodes[0], 0, *Comm);
+  ImportToOverlapMap = new Epetra_Import(*OverlapMap, *StandardMap);
+
+  create_FECrsGraph();
+}
+
 damageBVP::~damageBVP(){
 }
 
@@ -34,8 +47,7 @@ void damageBVP::assemble(Epetra_FECrsMatrix & matrix, Epetra_FEVector & rhs,
   Epetra_SerialDenseMatrix ke(Mesh->el_type, Mesh->el_type);
   Epetra_SerialDenseMatrix me(Mesh->el_type, Mesh->el_type);
 
-  double gauss_weight, hn, an;
-  double bn = gc*lc;
+  double gauss_weight, hn, an, bn;
   int eglob, id;
   int n_gauss_points = Mesh->n_gauss_cells;
   int * index = new int [Mesh->el_type];
@@ -55,6 +67,8 @@ void damageBVP::assemble(Epetra_FECrsMatrix & matrix, Epetra_FEVector & rhs,
       gauss_weight = Mesh->gauss_weight_cells(gp);
       id = n_gauss_points*eglob+gp;
       hn = damageHistory[GaussMap.LID(id)];
+      get_fracture_energy(eloc, gp, gc);
+      bn = gc*lc;
       an = 2.0*hn + gc/double(lc);
       for (unsigned int inode=0; inode<Mesh->el_type; ++inode){
           dx_shape_functions(0,inode) = Mesh->DX_N_cells(gp+n_gauss_points*inode,eloc);

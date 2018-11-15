@@ -14,6 +14,7 @@ public:
     double lc;
 
     damageBVP(Epetra_Comm & comm, mesh & mesh, double & gc_, double & lc_);
+    damageBVP(Epetra_Comm & comm, mesh & mesh, double & lc_);
     ~damageBVP();
 
     void solve(Teuchos::ParameterList & Parameters,
@@ -28,6 +29,8 @@ public:
 
     unsigned int n_bc_dof;
     int * dof_on_boundary;
+
+    virtual void get_fracture_energy(unsigned int & e_lid, unsigned int & gp, double & gc) = 0;
     /*
     void setup_dirichlet_conditions();
     void apply_dirichlet_conditions(Epetra_FECrsMatrix & K, Epetra_FEVector & F, double & displacement);

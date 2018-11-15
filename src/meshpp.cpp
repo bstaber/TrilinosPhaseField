@@ -124,6 +124,7 @@ int mesh::read_gmsh(std::string & fileName_mesh, double scaling){
                 }
                 break;
             case 4:
+                cells_physicalgroup.push_back(tag1-1);
                 for (unsigned int inode=0; inode<4; ++inode){
                     meshfile >> node;
                     tetra4_nodes.push_back(node-1);

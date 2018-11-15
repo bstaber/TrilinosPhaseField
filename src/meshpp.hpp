@@ -73,6 +73,7 @@ public:
     Epetra_IntSerialDenseMatrix nodes_to_boundaries;
 
     std::vector<double> nodes_coord;
+    std::vector<int> cells_physicalgroup;
     std::vector<int> cells_nodes, faces_nodes;
     std::vector<int> local_nodes_without_ghosts, local_dof_without_ghosts;
     std::vector<int> local_nodes, local_dof;

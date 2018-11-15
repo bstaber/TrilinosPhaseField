@@ -11,11 +11,6 @@ Brian Staber (brian.staber@gmail.com)
 class elasticBVP : public linearizedElasticity
 {
 public:
-  Epetra_SerialDenseMatrix elasticity;
-  Teuchos::RCP<damageBVP> damageInterface;
-
-  double gc, lc;
-  double E, nu, lambda, mu;
 
   elasticBVP(Epetra_Comm & comm, mesh & mesh_, Teuchos::ParameterList & Parameters);
   ~elasticBVP();
@@ -28,8 +23,8 @@ public:
                            Epetra_FECrsMatrix & matrix, Epetra_Vector & lhs, Epetra_FEVector & rhs,
                            Epetra_Vector & phi, Epetra_Map & OverlapMapD, double & bc_disp);
 
-  void updateDamageHistory(Epetra_Vector & damageHistory,
+  virtual void updateDamageHistory(Epetra_Vector & damageHistory,
                            Epetra_Vector & displacement,
-                           Epetra_Map & GaussMap);
+                           Epetra_Map & GaussMap) = 0;
 };
 #endif

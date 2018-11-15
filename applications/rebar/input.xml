@@ -1,9 +1,8 @@
 <ParameterList>
 
     <ParameterList name="Mesh">
-        <!--Parameter name="mesh_file" type="string" value="/Users/brian/Documents/GitHub/TrilinosUQComp/examples/phasefield/mesh_copy.msh"/-->
-        <Parameter name="printpath" type="string" value="/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/srbeam/results/"/>
-        <Parameter name="mesh_file" type="string" value="/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/srbeam/simplebeam.msh"/>
+        <Parameter name="printpath" type="string" value="/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/rebar/results/"/>
+        <Parameter name="mesh_file" type="string" value="/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/rebar/rebar.msh"/>
     </ParameterList>
 
     <ParameterList name="Elasticity">
@@ -31,7 +30,7 @@
     <ParameterList name="Damage">
 
         <Parameter name="gc"                  type="double" value="0.5"/>
-        <Parameter name="lc"                  type="double" value="0.01"/>
+        <Parameter name="lc"                  type="double" value="0.005"/>
 
         <ParameterList name="Aztec">
             <Parameter name="solver"          type="string" value="cg"/>

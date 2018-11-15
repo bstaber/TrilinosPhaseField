@@ -58,17 +58,14 @@ void staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterList & 
   for (int n=0; n<n_steps; ++n){
 
     Time.ResetStartTime();
-
     damageInterface->solve(ParametersList.sublist("Damage"), matrix_d, lhs_d, rhs_d, damageHistory, GaussMap);
 
     phi.Import(lhs_d, *damageInterface->ImportToOverlapMap, Insert);
 
     bc_disp = (double(n)+1.0)*delta_u;
-
     elasticInterface->computeDisplacement(ParametersList.sublist("Elasticity"), matrix_u, lhs_u, rhs_u,
                                                                                 phi, *damageInterface->OverlapMap,
                                                                                 bc_disp);
-
     elasticInterface->updateDamageHistory(damageHistory, lhs_u, GaussMap);
 
     if (Comm->MyPID()==0){
