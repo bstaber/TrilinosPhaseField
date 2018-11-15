@@ -86,12 +86,16 @@ void damageBVP::assemble(Epetra_FECrsMatrix & matrix, Epetra_FEVector & rhs,
 }
 
 void damageBVP::solve(Teuchos::ParameterList & Parameters,
-                        Epetra_FECrsMatrix & matrix, Epetra_Vector & lhs, Epetra_FEVector & rhs,
-                        Epetra_Vector & damageHistory,
-                        Epetra_Map & GaussMap){
+                      Epetra_FECrsMatrix & matrix, Epetra_Vector & lhs, Epetra_FEVector & rhs,
+                      Epetra_Vector & damageHistory,
+                      Epetra_Map & GaussMap){
 
+  double bc = 0.0;
+  std::cout << "Step1\n";
   assemble(matrix, rhs, damageHistory, GaussMap);
-
+  std::cout << "Step2\n";
+  apply_dirichlet_conditions(matrix, rhs, bc);
+  std::cout << "Step3\n";
   double tol   = Teuchos::getParameter<double>(Parameters.sublist("Aztec"), "AZ_tol");
   int max_iter = Teuchos::getParameter<int>(Parameters.sublist("Aztec"), "AZ_max_iter");
 

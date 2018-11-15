@@ -19,8 +19,8 @@ Brian Staber (brian.staber@gmail.com)
 
 #include "Teuchos_CommandLineProcessor.hpp"
 
-#include "elasticProblem.hpp"
-#include "damageProblem.hpp"
+#include "elasticProblemBeam.hpp"
+#include "damageProblemBeam.hpp"
 #include "staggeredAlgorithm.hpp"
 
 int main(int argc, char *argv[]){
@@ -60,8 +60,8 @@ MPI_Init(&argc, &argv);
 
   mesh Mesh(Comm, mesh_file, 1.0);
 
-  Teuchos::RCP<elasticProblem> elasInterface   = Teuchos::rcp(new elasticProblem(Comm, Mesh, *paramList));
-  Teuchos::RCP<damageProblem>  damageInterface = Teuchos::rcp(new damageProblem(Comm, Mesh, gc, lc));
+  Teuchos::RCP<elasticProblemBeam> elasInterface   = Teuchos::rcp(new elasticProblemBeam(Comm, Mesh, *paramList));
+  Teuchos::RCP<damageProblemBeam>  damageInterface = Teuchos::rcp(new damageProblemBeam(Comm, Mesh, gc, lc));
   Teuchos::RCP<staggeredAlgorithm> solver      = Teuchos::rcp(new staggeredAlgorithm(Comm, Mesh, *damageInterface, *elasInterface));
 
   solver->staggeredAlgorithmDirichletBC(*paramList, true);

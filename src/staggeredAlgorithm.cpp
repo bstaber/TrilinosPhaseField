@@ -68,6 +68,7 @@ void staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterList & 
     elasticInterface->computeDisplacement(ParametersList.sublist("Elasticity"), matrix_u, lhs_u, rhs_u,
                                                                                 phi, *damageInterface->OverlapMap,
                                                                                 bc_disp);
+
     elasticInterface->updateDamageHistory(damageHistory, lhs_u, GaussMap);
 
     if (Comm->MyPID()==0){
@@ -76,8 +77,8 @@ void staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterList & 
   }
 
   if (print){
-    std::string dispfile = "/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/block_single_notch/results/displacement" + std::to_string(int(n_steps)) + ".mtx";
-    std::string damgfile = "/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/block_single_notch/results/damage"       + std::to_string(int(n_steps)) + ".mtx";
+    std::string dispfile = "/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/srbeam/results/displacement" + std::to_string(int(n_steps)) + ".mtx";
+    std::string damgfile = "/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/srbeam/results/damage"       + std::to_string(int(n_steps)) + ".mtx";
     int error_u = elasticInterface->print_solution(lhs_u, dispfile);
     int error_d = damageInterface->print_solution(lhs_d, damgfile);
   }

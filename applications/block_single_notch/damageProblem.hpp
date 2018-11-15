@@ -14,11 +14,11 @@ public:
   }
 
   void setup_dirichlet_conditions(){
-    std::cout << "No essential boundary conditions.\n";
+    //std::cout << "No essential boundary conditions.\n";
   }
 
   void apply_dirichlet_conditions(Epetra_FECrsMatrix & K, Epetra_FEVector & F, double & displacement){
-    std::cout << "No essential boundary conditions.\n";
+    //std::cout << "No essential boundary conditions.\n";
   }
 
 };
