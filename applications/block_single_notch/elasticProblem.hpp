@@ -11,12 +11,20 @@ class elasticProblem : public elasticBVP
 {
 public:
 
-  elasticProblem(Epetra_Comm & comm, Teuchos::ParameterList & Parameters): elasticBVP(comm, Parameters){
+  elasticProblem(Epetra_Comm & comm, mesh & mesh_, Teuchos::ParameterList & Parameters): elasticBVP(comm, mesh_, Parameters){
     //initialize(comm, Parameters);
     setup_dirichlet_conditions();
   }
 
   ~elasticProblem(){
+  }
+
+  void get_elasticity_tensor(unsigned int & e_lid, unsigned int & gp, double & phi_e, Epetra_SerialDenseVector & epsilon, Epetra_SerialDenseMatrix & tangent_matrix){
+
+    double g = (1.0-phi_e)*(1.0-phi_e) + 1.0e-6;
+    tangent_matrix = elasticity;
+    tangent_matrix.Scale(g);
+
   }
 
   void setup_dirichlet_conditions(){

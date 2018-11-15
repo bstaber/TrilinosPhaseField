@@ -1,6 +1,9 @@
 #include "staggeredAlgorithm.hpp"
 
-staggeredAlgorithm::staggeredAlgorithm(damageBVP & damageInterface_, elasticBVP & elasticInterface_){
+staggeredAlgorithm::staggeredAlgorithm(Epetra_Comm & comm, mesh & mesh_, damageBVP & damageInterface_, elasticBVP & elasticInterface_){
+
+  Comm = &comm;
+  Mesh = &mesh_;
 
   damageInterface = &damageInterface_;
   elasticInterface = &elasticInterface_;
@@ -61,8 +64,10 @@ void staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterList & 
     phi.Import(lhs_d, *damageInterface->ImportToOverlapMap, Insert);
 
     bc_disp = (double(n)+1.0)*delta_u;
-    elasticInterface->computeDisplacement(ParametersList.sublist("Elasticity"), matrix_u, lhs_u, rhs_u, phi, *damageInterface->OverlapMap, bc_disp);
 
+    elasticInterface->computeDisplacement(ParametersList.sublist("Elasticity"), matrix_u, lhs_u, rhs_u,
+                                                                                phi, *damageInterface->OverlapMap,
+                                                                                bc_disp);
     elasticInterface->updateDamageHistory(damageHistory, lhs_u, GaussMap);
 
     if (Comm->MyPID()==0){

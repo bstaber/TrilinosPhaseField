@@ -25,8 +25,10 @@ public:
 
     void create_FECrsGraph();
     int print_solution(Epetra_Vector & lhs, std::string fileName);
+    /*
     void setup_dirichlet_conditions();
     void apply_dirichlet_conditions(Epetra_FECrsMatrix & K, Epetra_FEVector & F, double & displacement);
+    */
 };
 
 #endif

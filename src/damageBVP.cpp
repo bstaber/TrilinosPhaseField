@@ -5,10 +5,10 @@ Brian Staber (brian.staber@gmail.com)
 #include "damageBVP.hpp"
 #include "fepp.hpp"
 
-damageBVP::damageBVP(Epetra_Comm & comm, mesh & mesh, double & gc_, double & lc_):
+damageBVP::damageBVP(Epetra_Comm & comm, mesh & mesh_, double & gc_, double & lc_):
 gc(gc_), lc(lc_){
 
-  Mesh               = &mesh;
+  Mesh               = &mesh_;
   Comm               = Mesh->Comm;
 
   StandardMap        = new Epetra_Map(-1, Mesh->n_local_nodes_without_ghosts, &Mesh->local_nodes_without_ghosts[0], 0, *Comm);
@@ -126,14 +126,6 @@ void damageBVP::create_FECrsGraph(){
   Comm->Barrier();
   FEGraph->GlobalAssemble();
   delete[] index;
-}
-
-void damageBVP::setup_dirichlet_conditions(){
-  std::cout << "No essential boundary conditions.\n";
-}
-
-void damageBVP::apply_dirichlet_conditions(Epetra_FECrsMatrix & K, Epetra_FEVector & F, double & displacement){
-  std::cout << "No essential boundary conditions.\n";
 }
 
 int damageBVP::print_solution(Epetra_Vector & lhs, std::string fileName){

@@ -4,17 +4,15 @@ Brian Staber (brian.staber@gmail.com)
 
 #include "elasticBVP.hpp"
 
-elasticBVP::elasticBVP(Epetra_Comm & comm, Teuchos::ParameterList & Parameters){
+elasticBVP::elasticBVP(Epetra_Comm & comm, mesh & mesh_, Teuchos::ParameterList & Parameters){
 
-  std::string mesh_file = Teuchos::getParameter<std::string>(Parameters.sublist("Mesh"), "mesh_file");
+  Comm = &comm;
+  Mesh = &mesh_;
 
   gc = Teuchos::getParameter<double>(Parameters.sublist("Damage"), "gc");
   lc = Teuchos::getParameter<double>(Parameters.sublist("Damage"), "lc");
   E  = Teuchos::getParameter<double>(Parameters.sublist("Elasticity"), "young");
   nu = Teuchos::getParameter<double>(Parameters.sublist("Elasticity"), "poisson");
-
-  Mesh = new mesh(comm, mesh_file, 1.0);
-  Comm = Mesh->Comm;
 
   damageInterface = Teuchos::rcp(new damageBVP(comm, *Mesh, gc, lc));
 
@@ -41,96 +39,6 @@ elasticBVP::elasticBVP(Epetra_Comm & comm, Teuchos::ParameterList & Parameters){
 }
 
 elasticBVP::~elasticBVP(){
-}
-
-void elasticBVP::initialize(Epetra_Comm & comm, Teuchos::ParameterList & Parameters){
-
-  std::string mesh_file = Teuchos::getParameter<std::string>(Parameters.sublist("Mesh"), "mesh_file");
-
-  gc = Teuchos::getParameter<double>(Parameters.sublist("Damage"), "gc");
-  lc = Teuchos::getParameter<double>(Parameters.sublist("Damage"), "lc");
-  E  = Teuchos::getParameter<double>(Parameters.sublist("Elasticity"), "young");
-  nu = Teuchos::getParameter<double>(Parameters.sublist("Elasticity"), "poisson");
-
-  Mesh = new mesh(comm, mesh_file, 1.0);
-  Comm = Mesh->Comm;
-
-  damageInterface = Teuchos::rcp(new damageBVP(comm, *Mesh, gc, lc));
-
-  StandardMap = new Epetra_Map(-1, 3*Mesh->n_local_nodes_without_ghosts, &Mesh->local_dof_without_ghosts[0], 0, *Comm);
-  OverlapMap  = new Epetra_Map(-1, 3*Mesh->n_local_nodes, &Mesh->local_dof[0], 0, *Comm);
-  ImportToOverlapMap = new Epetra_Import(*OverlapMap, *StandardMap);
-  create_FECrsGraph();
-
-  lambda = E*nu/((1.0+nu)*(1.0-2.0*nu));
-  mu     = E/(2.0*(1.0+nu));
-
-  elasticity.Reshape(6,6);
-  double c11 = E*(1.0-nu)/((1.0+nu)*(1.0-2.0*nu));
-  double c12 = E*nu/((1.0+nu)*(1.0-2.0*nu));
-  double c44 = E/(2.0*(1.0+nu));
-
-  elasticity(0,0) = c11; elasticity(0,1) = c12; elasticity(0,2) = c12; elasticity(0,3) = 0.0; elasticity(0,4) = 0.0; elasticity(0,5) = 0.0;
-  elasticity(1,0) = c12; elasticity(1,1) = c11; elasticity(1,2) = c12; elasticity(1,3) = 0.0; elasticity(1,4) = 0.0; elasticity(1,5) = 0.0;
-  elasticity(2,0) = c12; elasticity(2,1) = c12; elasticity(2,2) = c11; elasticity(2,3) = 0.0; elasticity(2,4) = 0.0; elasticity(2,5) = 0.0;
-  elasticity(3,0) = 0.0; elasticity(3,1) = 0.0; elasticity(3,2) = 0.0; elasticity(3,3) = c44; elasticity(3,4) = 0.0; elasticity(3,5) = 0.0;
-  elasticity(4,0) = 0.0; elasticity(4,1) = 0.0; elasticity(4,2) = 0.0; elasticity(4,3) = 0.0; elasticity(4,4) = c44; elasticity(4,5) = 0.0;
-  elasticity(5,0) = 0.0; elasticity(5,1) = 0.0; elasticity(5,2) = 0.0; elasticity(5,3) = 0.0; elasticity(5,4) = 0.0; elasticity(5,5) = c44;
-}
-
-void elasticBVP::staggeredAlgorithmDirichletBC(Teuchos::ParameterList & ParametersList, bool print){
-
-  double delta_u  = Teuchos::getParameter<double>(ParametersList.sublist("Elasticity"), "delta_u");
-  int n_steps     = Teuchos::getParameter<int>(ParametersList.sublist("Elasticity"), "n_steps");
-
-  Epetra_Time Time(*Comm);
-
-  Epetra_FECrsMatrix matrix_d(Copy,*damageInterface->FEGraph);
-  Epetra_FECrsMatrix matrix_u(Copy,*FEGraph);
-
-  Epetra_FEVector    rhs_d(*damageInterface->StandardMap);
-  Epetra_FEVector    rhs_u(*StandardMap);
-
-  Epetra_Vector      lhs_d(*damageInterface->StandardMap);
-  Epetra_Vector      lhs_u(*StandardMap);
-
-  Epetra_Map GaussMap = constructGaussMap();
-  Epetra_Vector damageHistory(GaussMap);
-
-  if (Comm->MyPID()==0){
-    std::cout << "step" << std::setw(15) << "cpu_time (s)" << "\n";
-  }
-
-  double bc_disp = 0.0;
-  damageHistory.PutScalar(0.0);
-
-  Epetra_Vector phi(*damageInterface->OverlapMap);
-
-  for (int n=0; n<n_steps; ++n){
-
-    Time.ResetStartTime();
-
-    damageInterface->solve(ParametersList.sublist("Damage"), matrix_d, lhs_d, rhs_d, damageHistory, GaussMap);
-
-    phi.Import(lhs_d, *damageInterface->ImportToOverlapMap, Insert);
-
-    bc_disp = (double(n)+1.0)*delta_u;
-    computeDisplacement(ParametersList.sublist("Elasticity"), matrix_u, lhs_u, rhs_u, phi, *damageInterface->OverlapMap, bc_disp);
-
-    updateDamageHistory(damageHistory, lhs_u, GaussMap);
-
-    if (Comm->MyPID()==0){
-      std::cout << n << std::setw(15) << Time.ElapsedTime() << "\n";
-    }
-  }
-
-  if (print){
-    std::string dispfile = "/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/block_single_notch/results/displacement" + std::to_string(int(n_steps)) + ".mtx";
-    std::string damgfile = "/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/block_single_notch/results/damage"       + std::to_string(int(n_steps)) + ".mtx";
-    int error_u = print_solution(lhs_u, dispfile);
-    int error_d = damageInterface->print_solution(lhs_d, damgfile);
-  }
-
 }
 
 void elasticBVP::computeDisplacement(Teuchos::ParameterList & Parameters,
@@ -218,11 +126,4 @@ Epetra_Map elasticBVP::constructGaussMap(){
   }
   Epetra_Map GaussMap(-1, n_local_cells*n_gauss_cells, &local_gauss_points[0], 0, *Comm);
   return GaussMap;
-}
-
-void elasticBVP::get_elasticity_tensor(unsigned int & e_lid, unsigned int & gp, double & phi_e, Epetra_SerialDenseVector & epsilon, Epetra_SerialDenseMatrix & tangent_matrix){
-
-  double g = (1.0-phi_e)*(1.0-phi_e) + 1.0e-6;
-  tangent_matrix = elasticity;
-  tangent_matrix.Scale(g);
 }

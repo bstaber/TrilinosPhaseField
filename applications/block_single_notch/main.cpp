@@ -20,7 +20,8 @@ Brian Staber (brian.staber@gmail.com)
 #include "Teuchos_CommandLineProcessor.hpp"
 
 #include "elasticProblem.hpp"
-#include "damageBVP.hpp"
+#include "damageProblem.hpp"
+#include "staggeredAlgorithm.hpp"
 
 int main(int argc, char *argv[]){
 
@@ -52,9 +53,18 @@ MPI_Init(&argc, &argv);
       paramList->print(std::cout,2,true,true);
   }
 
-  Teuchos::RCP<elasticProblem> phaseFieldModel = Teuchos::rcp(new elasticProblem(Comm, *paramList));
 
-  phaseFieldModel->staggeredAlgorithmDirichletBC(*paramList, true);
+  std::string mesh_file = Teuchos::getParameter<std::string>(paramList->sublist("Mesh"), "mesh_file");
+  double gc = Teuchos::getParameter<double>(paramList->sublist("Damage"), "gc");
+  double lc = Teuchos::getParameter<double>(paramList->sublist("Damage"), "lc");
+
+  mesh Mesh(Comm, mesh_file, 1.0);
+
+  Teuchos::RCP<elasticProblem> elasInterface   = Teuchos::rcp(new elasticProblem(Comm, Mesh, *paramList));
+  Teuchos::RCP<damageBVP>      damageInterface = Teuchos::rcp(new damageProblem(Comm, Mesh, gc, lc));
+  Teuchos::RCP<staggeredAlgorithm> solver      = Teuchos::rcp(new staggeredAlgorithm(Comm, Mesh, *damageInterface, *elasInterface));
+
+  solver->staggeredAlgorithmDirichletBC(*paramList, true);
 
   #ifdef HAVE_MPI
       MPI_Finalize();

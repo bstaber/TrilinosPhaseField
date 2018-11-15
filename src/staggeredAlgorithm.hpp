@@ -9,7 +9,7 @@ class staggeredAlgorithm
 
 public:
 
-  staggeredAlgorithm(damageBVP & damageInterface_, elasticBVP & elasticInterface_);
+  staggeredAlgorithm(Epetra_Comm & comm, mesh & mesh_, damageBVP & damageInterface_, elasticBVP & elasticInterface_);
   ~staggeredAlgorithm();
 
   Epetra_Map constructGaussMap();
