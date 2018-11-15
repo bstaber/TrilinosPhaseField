@@ -17,14 +17,14 @@ public:
 
     void aztecSolver(Epetra_FECrsMatrix & A, Epetra_FEVector & b, Epetra_Vector & u, Teuchos::ParameterList & paramList);
 
-    void assemblePureDirichlet_homogeneousForcing(Epetra_FECrsMatrix & K);
-    void stiffness_homogeneousForcing(Epetra_FECrsMatrix & K);
+    void assemblePureDirichlet_homogeneousForcing(Epetra_FECrsMatrix & K, Epetra_Vector & phi, Epetra_Map & OverlapMapD);
+    void stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, Epetra_Vector & phi, Epetra_Map & OverlapMapD);
 
     void compute_B_matrices(Epetra_SerialDenseMatrix & dx_shape_functions, Epetra_SerialDenseMatrix & B);
 
     int print_solution(Epetra_Vector & solution, std::string fileName);
 
-    virtual void get_elasticity_tensor(unsigned int & e_lid, unsigned int & gp, Epetra_SerialDenseMatrix & tangent_matrix) = 0;
+    virtual void get_elasticity_tensor(unsigned int & e_lid, unsigned int & gp, double & phi_e, Epetra_SerialDenseVector & epsilon, Epetra_SerialDenseMatrix & tangent_matrix) = 0;
 
     unsigned int n_bc_dof;
     int * dof_on_boundary;

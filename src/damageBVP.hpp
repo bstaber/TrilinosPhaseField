@@ -2,19 +2,19 @@
 Brian Staber (brian.staber@gmail.com)
 */
 
-#ifndef DAMAGEFIELD_HPP
-#define DAMAGEFIELD_HPP
+#ifndef DAMAGEBVP_HPP
+#define DAMAGEBVP_HPP
 
 #include "linearFiniteElementProblem.hpp"
 
-class damageField : public linearFiniteElementProblem
+class damageBVP : public linearFiniteElementProblem
 {
 public:
     double gc;
     double lc;
 
-    damageField(Epetra_Comm & comm, mesh & mesh, double & gc_, double & lc_);
-    ~damageField();
+    damageBVP(Epetra_Comm & comm, mesh & mesh, double & gc_, double & lc_);
+    ~damageBVP();
 
     void solve(Teuchos::ParameterList & Parameters,
                Epetra_FECrsMatrix & matrix, Epetra_Vector & lhs, Epetra_FEVector & rhs,

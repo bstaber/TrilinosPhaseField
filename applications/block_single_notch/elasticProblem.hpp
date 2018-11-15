@@ -2,21 +2,21 @@
 Brian Staber (brian.staber@gmail.com)
 */
 
-#ifndef PHASEFIELDPROBLEM_HPP
-#define PHASEFIELDPROBLEM_HPP
+#ifndef ELASTICPROBLEM_HPP
+#define ELASTICPROBLEM_HPP
 
-#include "phaseFieldLinearizedElasticity.hpp"
+#include "elasticBVP.hpp"
 
-class phaseFieldProblem : public phaseFieldLinearizedElasticity{
-
+class elasticProblem : public elasticBVP
+{
 public:
 
-  phaseFieldProblem(Epetra_Comm & comm, Teuchos::ParameterList & Parameters){
-    initialize(comm, Parameters);
+  elasticProblem(Epetra_Comm & comm, Teuchos::ParameterList & Parameters): elasticBVP(comm, Parameters){
+    //initialize(comm, Parameters);
     setup_dirichlet_conditions();
   }
 
-  ~phaseFieldProblem(){
+  ~elasticProblem(){
   }
 
   void setup_dirichlet_conditions(){

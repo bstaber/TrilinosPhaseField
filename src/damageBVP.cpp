@@ -2,10 +2,10 @@
 Brian Staber (brian.staber@gmail.com)
 */
 
-#include "damageField.hpp"
+#include "damageBVP.hpp"
 #include "fepp.hpp"
 
-damageField::damageField(Epetra_Comm & comm, mesh & mesh, double & gc_, double & lc_):
+damageBVP::damageBVP(Epetra_Comm & comm, mesh & mesh, double & gc_, double & lc_):
 gc(gc_), lc(lc_){
 
   Mesh               = &mesh;
@@ -18,11 +18,11 @@ gc(gc_), lc(lc_){
   create_FECrsGraph();
 }
 
-damageField::~damageField(){
+damageBVP::~damageBVP(){
 }
 
-void damageField::assemble(Epetra_FECrsMatrix & matrix, Epetra_FEVector & rhs,
-                           Epetra_Vector & damageHistory, Epetra_Map & GaussMap){
+void damageBVP::assemble(Epetra_FECrsMatrix & matrix, Epetra_FEVector & rhs,
+                         Epetra_Vector & damageHistory, Epetra_Map & GaussMap){
 
   matrix.PutScalar(0.0);
   rhs.PutScalar(0.0);
@@ -85,7 +85,7 @@ void damageField::assemble(Epetra_FECrsMatrix & matrix, Epetra_FEVector & rhs,
   delete [] index;
 }
 
-void damageField::solve(Teuchos::ParameterList & Parameters,
+void damageBVP::solve(Teuchos::ParameterList & Parameters,
                         Epetra_FECrsMatrix & matrix, Epetra_Vector & lhs, Epetra_FEVector & rhs,
                         Epetra_Vector & damageHistory,
                         Epetra_Map & GaussMap){
@@ -104,7 +104,7 @@ void damageField::solve(Teuchos::ParameterList & Parameters,
   solver.Iterate(max_iter, tol);
 }
 
-void damageField::create_FECrsGraph(){
+void damageBVP::create_FECrsGraph(){
   FEGraph = new Epetra_FECrsGraph(Copy,*StandardMap,100);
   int eglob, node;
   int *index;
@@ -128,15 +128,15 @@ void damageField::create_FECrsGraph(){
   delete[] index;
 }
 
-void damageField::setup_dirichlet_conditions(){
+void damageBVP::setup_dirichlet_conditions(){
   std::cout << "No essential boundary conditions.\n";
 }
 
-void damageField::apply_dirichlet_conditions(Epetra_FECrsMatrix & K, Epetra_FEVector & F, double & displacement){
+void damageBVP::apply_dirichlet_conditions(Epetra_FECrsMatrix & K, Epetra_FEVector & F, double & displacement){
   std::cout << "No essential boundary conditions.\n";
 }
 
-int damageField::print_solution(Epetra_Vector & lhs, std::string fileName){
+int damageBVP::print_solution(Epetra_Vector & lhs, std::string fileName){
     int NumTargetElements = 0;
     if (Comm->MyPID()==0){
         NumTargetElements = Mesh->n_nodes;

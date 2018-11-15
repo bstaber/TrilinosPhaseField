@@ -17,9 +17,10 @@ Brian Staber (brian.staber@gmail.com)
 #include "Teuchos_ParameterList.hpp"
 #include "Teuchos_XMLParameterListCoreHelpers.hpp"
 
-#include "phaseFieldProblem.hpp"
-
 #include "Teuchos_CommandLineProcessor.hpp"
+
+#include "elasticProblem.hpp"
+#include "damageBVP.hpp"
 
 int main(int argc, char *argv[]){
 
@@ -51,7 +52,7 @@ MPI_Init(&argc, &argv);
       paramList->print(std::cout,2,true,true);
   }
 
-  Teuchos::RCP<phaseFieldProblem> phaseFieldModel = Teuchos::rcp(new phaseFieldProblem(Comm, *paramList));
+  Teuchos::RCP<elasticProblem> phaseFieldModel = Teuchos::rcp(new elasticProblem(Comm, *paramList));
 
   phaseFieldModel->staggeredAlgorithmDirichletBC(*paramList, true);
 
