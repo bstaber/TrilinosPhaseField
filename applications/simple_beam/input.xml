@@ -2,7 +2,7 @@
 
     <ParameterList name="Mesh">
         <Parameter name="printpath" type="string" value="/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/simple_beam/results/"/>
-        <Parameter name="mesh_file" type="string" value="/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/simple_beam/simplebeam.msh"/>
+        <Parameter name="mesh_file" type="string" value="/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/rebar/rebar.msh"/>
     </ParameterList>
 
     <ParameterList name="Elasticity">

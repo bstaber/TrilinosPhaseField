@@ -11,10 +11,10 @@ Point(2) = {0, 0.1, 0, lc1};
 Point(3) = {0.1, 0.1, 0, lc1};
 
 Point(4)  = {0.05,   0.05,   0, lc1};
-Point(5)  = {0.05+r, 0.05,   0, lc1};
-Point(6)  = {0.05,   0.05+r, 0, lc1};
-Point(7)  = {0.05-r, 0.05,   0, lc1};
-Point(8)  = {0.05,   0.05-r, 0, lc1};
+Point(5)  = {0.05+r, 0.05,   0, lc2};
+Point(6)  = {0.05,   0.05+r, 0, lc2};
+Point(7)  = {0.05-r, 0.05,   0, lc2};
+Point(8)  = {0.05,   0.05-r, 0, lc2};
 //+
 Line(1) = {2, 3};
 //+
@@ -41,11 +41,11 @@ Plane Surface(1) = {1, 2};
 Plane Surface(2) = {2};
 //+
 Extrude {0, 0, 1} {
-  Surface{1}; Layers{60};
+  Surface{1}; Layers{100};
 }
 //+
 Extrude {0, 0, 1} {
-  Surface{2}; Layers{60};
+  Surface{2}; Layers{100};
 }
 //+
 Physical Volume(1) = {1};

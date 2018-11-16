@@ -26,8 +26,8 @@ public:
     E(0)  = Teuchos::getParameter<double>(Parameters.sublist("Elasticity"), "young");
     nu(0) = Teuchos::getParameter<double>(Parameters.sublist("Elasticity"), "poisson");
 
-    E(1)  = 10.0*E(0);
-    nu(1) = 10.0*nu(0);
+    E(1)  = E(0);
+    nu(1) = nu(0);
 
     for (unsigned int j=0; j<2; ++j){
       lambda(j) = E(j)*nu(j)/((1.0+nu(j))*(1.0-2.0*nu(j)));
@@ -62,9 +62,7 @@ public:
 
   }
 
-  void updateDamageHistory(Epetra_Vector & damageHistory,
-                                       Epetra_Vector & displacement,
-                                       Epetra_Map & GaussMap){
+  void updateDamageHistory(Epetra_Vector & damageHistory, Epetra_Vector & displacement, Epetra_Map & GaussMap){
 
     Epetra_Vector u(*OverlapMap);
     u.Import(displacement, *ImportToOverlapMap, Insert);

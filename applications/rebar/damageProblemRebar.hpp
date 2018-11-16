@@ -14,7 +14,7 @@ public:
     setup_dirichlet_conditions();
     gcs.Resize(2);
     gcs(0) = gc;
-    gcs(1) = 100.0*gc;
+    gcs(1) = 100*gc;
   }
   ~damageProblemRebar(){
   }
