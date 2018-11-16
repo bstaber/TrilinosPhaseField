@@ -71,14 +71,15 @@ void staggeredAlgorithm::staggeredAlgorithmDirichletBC(Teuchos::ParameterList & 
     if (Comm->MyPID()==0){
       std::cout << n << std::setw(15) << Time.ElapsedTime() << "\n";
     }
-  }
 
-  if (print){
-    std::string printpath = Teuchos::getParameter<std::string>(ParametersList.sublist("Mesh"),"printpath");
-    std::string dispfile  = printpath + "displacement" + std::to_string(int(n_steps)) + ".mtx";
-    std::string damgfile  = printpath + "damage"       + std::to_string(int(n_steps)) + ".mtx";
-    int error_u = elasticInterface->print_solution(lhs_u, dispfile);
-    int error_d = damageInterface->print_solution(lhs_d, damgfile);
+    if (print){
+      std::string printpath = Teuchos::getParameter<std::string>(ParametersList.sublist("Mesh"),"printpath");
+      std::string dispfile  = printpath + "displacement" + std::to_string(int(n)) + ".mtx";
+      std::string damgfile  = printpath + "damage"       + std::to_string(int(n)) + ".mtx";
+      int error_u = elasticInterface->print_solution(lhs_u, dispfile);
+      int error_d = damageInterface->print_solution(lhs_d, damgfile);
+    }
+
   }
 
 }

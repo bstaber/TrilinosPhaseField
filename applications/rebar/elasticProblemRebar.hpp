@@ -101,7 +101,7 @@ public:
           trepsilon2 = epsilon(0)*epsilon(0) + epsilon(1)*epsilon(1) + epsilon(2)*epsilon(2) +
                        0.5*epsilon(3)*epsilon(3) + 0.5*epsilon(4)*epsilon(4) + 0.5*epsilon(5)*epsilon(5);
 
-          id = n_gauss_points*egid+gp;
+          id        = n_gauss_points*egid+gp;
           history   = damageHistory[GaussMap.LID(id)];
           potential = (lambda(phase)/2.0)*trepsilon*trepsilon + mu(phase)*trepsilon2;
           if (potential>history){

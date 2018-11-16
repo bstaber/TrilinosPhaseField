@@ -36,7 +36,7 @@ void linearizedElasticity::create_FECrsGraph(){
   }
   Comm->Barrier();
   FEGraph->GlobalAssemble();
-  delete[] index;
+  delete [] index;
 }
 
 void linearizedElasticity::aztecSolver(Epetra_FECrsMatrix & A, Epetra_FEVector & b, Epetra_Vector & u, Teuchos::ParameterList & paramList){
@@ -104,7 +104,9 @@ void linearizedElasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, 
 
       for (unsigned int gp=0; gp<n_gauss_points; ++gp){
           gauss_weight = Mesh->gauss_weight_cells(gp);
-          xi = Mesh->xi_cells[gp]; eta = Mesh->eta_cells[gp]; zeta = Mesh->zeta_cells[gp];
+          xi   = Mesh->xi_cells[gp];
+          eta  = Mesh->eta_cells[gp];
+          zeta = Mesh->zeta_cells[gp];
           tetra4::shape_functions(shape_functions, xi, eta, zeta);
           phi_e = 0.0;
           for (unsigned int inode=0; inode<Mesh->el_type; ++inode){
@@ -112,7 +114,7 @@ void linearizedElasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, 
               dx_shape_functions(inode,1) = Mesh->DY_N_cells(gp+n_gauss_points*inode,e_lid);
               dx_shape_functions(inode,2) = Mesh->DZ_N_cells(gp+n_gauss_points*inode,e_lid);
 
-              node = Mesh->cells_nodes[Mesh->el_type*e_gid+inode];
+              node   = Mesh->cells_nodes[Mesh->el_type*e_gid+inode];
               phi_e += shape_functions(inode)*phi[OverlapMapD.LID(node)];
           }
           compute_B_matrices(dx_shape_functions,matrix_B);
@@ -128,33 +130,33 @@ void linearizedElasticity::stiffness_homogeneousForcing(Epetra_FECrsMatrix & K, 
           }
       }
   }
-  delete[] Indices_cells;
+  delete [] Indices_cells;
 }
 
 void linearizedElasticity::compute_B_matrices(Epetra_SerialDenseMatrix & dx_shape_functions, Epetra_SerialDenseMatrix & B){
   double factor = 1.0; ///std::sqrt(2.0);
   for (unsigned inode=0; inode<Mesh->el_type; ++inode){
-      B(0,3*inode) = dx_shape_functions(inode,0);
+      B(0,3*inode)   = dx_shape_functions(inode,0);
       B(0,3*inode+1) = 0.0;
       B(0,3*inode+2) = 0.0;
 
-      B(1,3*inode) = 0.0;
+      B(1,3*inode)   = 0.0;
       B(1,3*inode+1) = dx_shape_functions(inode,1);
       B(1,3*inode+2) = 0.0;
 
-      B(2,3*inode) = 0.0;
+      B(2,3*inode)   = 0.0;
       B(2,3*inode+1) = 0.0;
       B(2,3*inode+2) = dx_shape_functions(inode,2);
 
-      B(3,3*inode) = 0.0;
+      B(3,3*inode)   = 0.0;
       B(3,3*inode+1) = factor*dx_shape_functions(inode,2);
       B(3,3*inode+2) = factor*dx_shape_functions(inode,1);
 
-      B(4,3*inode) = factor*dx_shape_functions(inode,2);
+      B(4,3*inode)   = factor*dx_shape_functions(inode,2);
       B(4,3*inode+1) = 0.0;
       B(4,3*inode+2) = factor*dx_shape_functions(inode,0);
 
-      B(5,3*inode) = factor*dx_shape_functions(inode,1);
+      B(5,3*inode)   = factor*dx_shape_functions(inode,1);
       B(5,3*inode+1) = factor*dx_shape_functions(inode,0);
       B(5,3*inode+2) = 0.0;
   }
@@ -174,5 +176,4 @@ int linearizedElasticity::print_solution(Epetra_Vector & solution, std::string f
   int error = EpetraExt::MultiVectorToMatrixMarketFile(fileName.c_str(),lhs_root,0,0,false);
 
   return error;
-
 }

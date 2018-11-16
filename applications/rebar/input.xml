@@ -1,8 +1,8 @@
 <ParameterList>
 
     <ParameterList name="Mesh">
-        <Parameter name="printpath" type="string" value="/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/rebar/results/"/>
-        <Parameter name="mesh_file" type="string" value="/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/rebar/rebar.msh"/>
+        <Parameter name="printpath" type="string" value="/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/rebar/results_test/"/>
+        <Parameter name="mesh_file" type="string" value="/Users/brian/Documents/GitHub/TrilinosPhaseField/applications/rebar/rebar_test.msh"/>
     </ParameterList>
 
     <ParameterList name="Elasticity">
