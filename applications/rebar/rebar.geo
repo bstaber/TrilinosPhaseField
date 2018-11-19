@@ -1,7 +1,7 @@
 // Gmsh project created on Thu Nov 15 13:47:20 2018
 
-lc1 = 0.0025;
-lc2 = 0.0025;
+lc1 = 0.005;
+lc2 = 0.005;
 
 r = 0.08*0.2;
 
@@ -41,11 +41,11 @@ Plane Surface(1) = {1, 2};
 Plane Surface(2) = {2};
 //+
 Extrude {0, 0, 1} {
-  Surface{1}; Layers{100};
+  Surface{1}; Layers{50};
 }
 //+
 Extrude {0, 0, 1} {
-  Surface{2}; Layers{100};
+  Surface{2}; Layers{50};
 }
 //+
 Physical Volume(1) = {1};

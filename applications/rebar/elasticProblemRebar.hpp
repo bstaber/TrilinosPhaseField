@@ -15,7 +15,6 @@ public:
   Epetra_SerialDenseVector lambda, mu, E, nu;
 
   elasticProblemRebar(Epetra_Comm & comm, mesh & mesh_, Teuchos::ParameterList & Parameters): elasticBVP(comm, mesh_, Parameters){
-    //initialize(comm, Parameters);
     setup_dirichlet_conditions();
 
     E.Resize(2);
@@ -26,8 +25,8 @@ public:
     E(0)  = Teuchos::getParameter<double>(Parameters.sublist("Elasticity"), "young");
     nu(0) = Teuchos::getParameter<double>(Parameters.sublist("Elasticity"), "poisson");
 
-    E(1)  = E(0);
-    nu(1) = nu(0);
+    E(1)  = 10.0*E(0);
+    nu(1) = 10.0*nu(0);
 
     for (unsigned int j=0; j<2; ++j){
       lambda(j) = E(j)*nu(j)/((1.0+nu(j))*(1.0-2.0*nu(j)));
@@ -45,9 +44,9 @@ public:
     int e_gid = Mesh->local_cells[e_lid];
     int j     = Mesh->cells_physicalgroup[e_gid];
 
-    double c11 = E(j)*(1.0-nu(j))/((1.0+nu(j))*(1.0-2.0*nu(j)));
-    double c12 = E(j)*nu(j)/((1.0+nu(j))*(1.0-2.0*nu(j)));
-    double c44 = E(j)/(2.0*(1.0+nu(j)));
+    double c11 = lambda(j)+2.0*mu(j);
+    double c12 = lambda(j);
+    double c44 = mu(j);
 
     elasticity(0,0) = c11; elasticity(0,1) = c12; elasticity(0,2) = c12; elasticity(0,3) = 0.0; elasticity(0,4) = 0.0; elasticity(0,5) = 0.0;
     elasticity(1,0) = c12; elasticity(1,1) = c11; elasticity(1,2) = c12; elasticity(1,3) = 0.0; elasticity(1,4) = 0.0; elasticity(1,5) = 0.0;
