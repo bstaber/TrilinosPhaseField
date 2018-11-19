@@ -62,7 +62,7 @@ MPI_Init(&argc, &argv);
 
   Teuchos::RCP<elasticProblemRebar> elasInterface   = Teuchos::rcp(new elasticProblemRebar(Comm, Mesh, *paramList));
   Teuchos::RCP<damageProblemRebar>  damageInterface = Teuchos::rcp(new damageProblemRebar(Comm, Mesh, gc, lc));
-  Teuchos::RCP<staggeredAlgorithm> solver      = Teuchos::rcp(new staggeredAlgorithm(Comm, Mesh, *damageInterface, *elasInterface));
+  Teuchos::RCP<staggeredAlgorithm> solver           = Teuchos::rcp(new staggeredAlgorithm(Comm, Mesh, *damageInterface, *elasInterface));
 
   solver->staggeredAlgorithmDirichletBC(*paramList, true);
 
