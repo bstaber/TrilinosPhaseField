@@ -15,7 +15,6 @@ public:
   double E, nu, lambda, mu;
 
   elasticProblem(Epetra_Comm & comm, mesh & mesh_, Teuchos::ParameterList & Parameters): elasticBVP(comm, mesh_, Parameters){
-    //initialize(comm, Parameters);
     setup_dirichlet_conditions();
 
     E  = Teuchos::getParameter<double>(Parameters.sublist("Elasticity"), "young");
