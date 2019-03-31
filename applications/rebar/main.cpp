@@ -25,7 +25,7 @@ Brian Staber (brian.staber@gmail.com)
 
 int main(int argc, char *argv[]){
 
-  std::string    xmlInFileName = "";
+  std::string xmlInFileName = "";
 
   Teuchos::CommandLineProcessor  clp(false);
   clp.setOption("xml-in-file",&xmlInFileName,"The XML file to read into a parameter list");
